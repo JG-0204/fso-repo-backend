@@ -16,7 +16,11 @@ app.use(
   }),
 );
 
-const persons = [
+const cors = require('cors');
+
+app.use(cors());
+
+let persons = [
   {
     id: 1,
     name: 'Arto Hellas',
@@ -68,7 +72,7 @@ app.get('/api/persons/:id', (request, response) => {
 app.delete('/api/persons/:id', (request, response) => {
   const id = Number(request.params.id);
 
-  persons.filter((person) => person.id !== id);
+  persons = persons.filter((person) => person.id !== id);
 
   response.status(204).end();
 });
@@ -100,12 +104,12 @@ app.post('/api/persons', (request, response) => {
   if (checkIfNameExist(body.name)) respond400(response, 'name must be unique');
 
   const person = {
+    id: generateId(),
     name: body.name,
     number: body.number,
-    id: generateId(),
   };
 
-  persons.concat(person);
+  persons = persons.concat(person);
 
   response.json(person);
 });
