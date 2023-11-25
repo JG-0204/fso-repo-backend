@@ -3,6 +3,19 @@ const app = express();
 
 app.use(express.json());
 
+const morgan = require('morgan');
+
+morgan.token('body', function (req, res) {
+  return JSON.stringify(req.body);
+});
+
+app.use(
+  morgan('tiny'),
+  morgan(function (tokens, req, res) {
+    return tokens.body(req, res);
+  }),
+);
+
 const persons = [
   {
     id: 1,
