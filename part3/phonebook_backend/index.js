@@ -99,11 +99,12 @@ const respond400 = (response, message) => {
 app.post('/api/persons', (request, response) => {
   const body = request.body;
 
-  if (!body.name) respond400(response, 'name is missing');
+  if (body.name === '') return respond400(response, 'name is missing');
 
-  if (!body.number) respond400(response, 'number is missing');
+  if (body.number === '') return respond400(response, 'number is missing');
 
-  if (checkIfNameExist(body.name)) respond400(response, 'name must be unique');
+  if (checkIfNameExist(body.name))
+    return respond400(response, 'name must be unique');
 
   const person = {
     id: generateId(),
