@@ -1,22 +1,20 @@
 const dotenv = require('dotenv');
+
 dotenv.config({ path: './.env' });
+
 const express = require('express');
-const Person = require('./models/person');
+
 const app = express();
 
 app.use(express.json());
 
 const morgan = require('morgan');
 
-morgan.token('body', function (req, res) {
-  return JSON.stringify(req.body);
-});
+morgan.token('body', (req) => JSON.stringify(req.body));
 
 app.use(
   morgan('tiny'),
-  morgan(function (tokens, req, res) {
-    return tokens.body(req, res);
-  }),
+  morgan((tokens, req, res) => tokens.body(req, res)),
 );
 
 const cors = require('cors');
@@ -24,6 +22,8 @@ const cors = require('cors');
 app.use(cors());
 
 app.use(express.static('dist'));
+
+const Person = require('./models/person');
 
 app.get('/api/persons/', (request, response) => {
   Person.find({}).then((person) => {
@@ -41,7 +41,7 @@ app.get('/info', async (request, response) => {
 });
 
 app.get('/api/persons/:id', (request, response, next) => {
-  const id = request.params.id;
+  const { id } = request.params;
 
   Person.findById(id)
     .then((person) => {
@@ -55,25 +55,24 @@ app.get('/api/persons/:id', (request, response, next) => {
 });
 
 app.delete('/api/persons/:id', (request, response, next) => {
-  const id = request.params.id;
+  const { id } = request.params;
 
   Person.findByIdAndDelete(id)
-    .then((result) => {
+    .then(() => {
       response.status(204).end();
     })
-    .catch((error) => {
-      return next(error);
-    });
+    .catch((error) => next(error));
 });
 
+// eslint-disable-next-line arrow-body-style
 const respond400 = (response, message) => {
   return response.status(400).json({
     error: message,
   });
 };
-
-app.post('/api/persons', async (request, response, next) => {
-  const body = request.body;
+// eslint-disable-next-line consistent-return
+app.post('/api/persons', (request, response, next) => {
+  const { body } = request;
 
   if (body.name === '') return respond400(response, 'name is missing');
 
@@ -106,12 +105,12 @@ app.put('/api/persons/:id', (request, response, next) => {
     .catch((error) => next(error));
 });
 
+// eslint-disable-next-line consistent-return
 const errorHandler = (error, request, response, next) => {
-  console.error(error.message);
-
   if (error.name === 'CastError') {
     return response.status(400).send({ error: 'malformatted id' });
-  } else if (error.name === 'ValidationError') {
+  }
+  if (error.name === 'ValidationError') {
     return response.status(400).send({ error: error.message });
   }
 
@@ -120,7 +119,8 @@ const errorHandler = (error, request, response, next) => {
 
 app.use(errorHandler);
 
-const PORT = process.env.PORT;
+const { PORT } = process.env;
 app.listen(PORT, () => {
+  // eslint-disable-next-line no-console
   console.log(`Server running on port ${PORT}`);
 });
