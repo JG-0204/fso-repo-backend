@@ -79,28 +79,18 @@ app.delete('/api/persons/:id', (request, response, next) => {
     });
 });
 
-const checkIfNameExist = (name) => {
-  const person = persons.find(
-    (person) => person.name.toLowerCase() === name.toLowerCase(),
-  );
-  return person ? true : false;
-};
-
 const respond400 = (response, message) => {
   return response.status(400).json({
     error: message,
   });
 };
 
-app.post('/api/persons', (request, response) => {
+app.post('/api/persons', async (request, response) => {
   const body = request.body;
 
   if (body.name === '') return respond400(response, 'name is missing');
 
   if (body.number === '') return respond400(response, 'number is missing');
-
-  if (checkIfNameExist(body.name))
-    return respond400(response, 'name must be unique');
 
   const person = new Person({
     name: body.name,
