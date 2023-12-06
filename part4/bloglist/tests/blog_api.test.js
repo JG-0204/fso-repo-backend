@@ -6,6 +6,7 @@ const app = require('../app');
 const api = supertest(app);
 
 const Blog = require('../models/blog');
+const User = require('../models/user');
 
 beforeEach(async () => {
   await Blog.deleteMany({});
@@ -103,6 +104,38 @@ describe('adding new blogs', () => {
 
     await api.post('/api/blogs').send(newBlog).expect(400);
   }, 10000);
+});
+
+describe('tests for users', () => {
+  test('returns an error when an invalid user is being added', async () => {
+    const invalidUser = {
+      username: 'sss',
+      name: 'ssss',
+      password: 'ss',
+    };
+
+    const response = await api.post('/api/users').send(invalidUser).expect(400);
+
+    expect(Object.keys(response.body)).toContain('error');
+  });
+
+  test('invalid users are not created', async () => {
+    let userDb = await helper.usersInDb();
+
+    const prevLength = userDb.length;
+
+    const invalidUser = {
+      username: 'ss',
+      name: 'ssss',
+      password: 'ss',
+    };
+
+    await api.post('/api/users').send(invalidUser);
+
+    const currLength = userDb.length;
+
+    expect(currLength).toEqual(prevLength);
+  });
 });
 
 afterAll(async () => {
