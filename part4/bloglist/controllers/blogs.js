@@ -7,17 +7,11 @@ const jwt = require('jsonwebtoken');
 blogsRouter.post('/', async (request, response, next) => {
   const body = request.body;
 
-  const token = jwt.verify(request.token, process.env.SECRET);
-
-  if (!token.id) {
-    return response.status(401).json({
-      error: 'token invalid',
-    });
-  }
-
-  const user = await User.findById(token.id);
+  const user = request.user;
 
   if (!body.title || !body.url) return response.status(400).end();
+
+  if (!body.likes) body.likes = 0;
 
   const blog = new Blog({
     title: body.title,
@@ -32,14 +26,6 @@ blogsRouter.post('/', async (request, response, next) => {
   await user.save();
 
   response.status(201).json(savedBlog);
-
-  // if (!body.likes) {
-  //   blog = new Blog({ ...body, likes: 0 });
-  //   return response.status(201).json(await blog.save());
-  // }
-
-  // blog = new Blog(body);
-  // response.status(201).json(await blog.save());
 });
 
 blogsRouter.get('/', async (request, response, next) => {
@@ -66,6 +52,22 @@ blogsRouter.put('/:id', async (request, response, next) => {
     new: true,
   });
   response.json(newBlog);
+});
+
+blogsRouter.delete('/:id', async (request, response, next) => {
+  const blog = await Blog.findById(request.params.id);
+
+  const user = request.user;
+
+  if (!(blog.user.toString() === user.id)) {
+    return response.status(401).json({
+      error: 'invalid user',
+    });
+  }
+
+  await Blog.deleteOne(blog);
+
+  return response.status(204).end();
 });
 
 module.exports = blogsRouter;

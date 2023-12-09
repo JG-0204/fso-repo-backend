@@ -8,6 +8,9 @@ const api = supertest(app);
 const Blog = require('../models/blog');
 const User = require('../models/user');
 
+const token =
+  'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlNvbGVpbCIsImlkIjoiNjU3NDNkYmZlZTJiYmNhNGI5ZmM2YzYxIiwiaWF0IjoxNzAyMTE2ODI5fQ.9KEMZ_f6-3pH_pLxb0EioJwImNeHbpLl8PhCybsktu4';
+
 beforeEach(async () => {
   await Blog.deleteMany({});
   await Blog.insertMany(helper.sampleBlogs);
@@ -17,12 +20,13 @@ describe('database contain blogs', () => {
   test('blogs are returned as json', async () => {
     await api
       .get('/api/blogs')
+      .set('Authorization', token)
       .expect(200)
       .expect('Content-Type', /application\/json/);
   }, 10000);
 
   test('blog unique identifier is named id', async () => {
-    const response = await api.get('/api/blogs');
+    const response = await api.get('/api/blogs').set('Authorization', token);
 
     const arr = response.body;
 
@@ -34,7 +38,9 @@ describe('database contain blogs', () => {
 
     const blog = { ...blogs[0] };
 
-    const newBlog = await api.get(`/api/blogs/${blog.id}`);
+    const newBlog = await api
+      .get(`/api/blogs/${blog.id}`)
+      .set('Authorization', token);
 
     expect(newBlog.status).toBe(201);
     expect(newBlog.body).toEqual(blog);
@@ -51,7 +57,10 @@ describe('database contain blogs', () => {
       id: blogs[0].id,
     };
 
-    const newBlog = await api.put(`/api/blogs/${blog.id}`).send(blog);
+    const newBlog = await api
+      .put(`/api/blogs/${blog.id}`)
+      .set('Authorization', token)
+      .send(blog);
 
     expect(newBlog.body.likes).toBe(blog.likes);
   }, 10000);
@@ -68,6 +77,7 @@ describe('adding new blogs', () => {
 
     await api
       .post('/api/blogs')
+      .set('Authorization', token)
       .send(newBlog)
       .expect(201)
       .expect('Content-Type', /application\/json/);
@@ -85,11 +95,12 @@ describe('adding new blogs', () => {
 
     await api
       .post('/api/blogs')
+      .set('Authorization', token)
       .send(newBlog)
       .expect(201)
       .expect('Content-Type', /application\/json/);
 
-    const response = await api.get('/api/blogs');
+    const response = await api.get('/api/blogs').set('Authorization', token);
     const keys = Object.keys(response.body[response.body.length - 1]);
 
     expect(keys).toContain('likes');
@@ -102,8 +113,27 @@ describe('adding new blogs', () => {
       url: 'url',
     };
 
-    await api.post('/api/blogs').send(newBlog).expect(400);
+    await api
+      .post('/api/blogs')
+      .set('Authorization', token)
+      .send(newBlog)
+      .expect(400);
   }, 10000);
+
+  test('return 401 when token is missing', async () => {
+    const newBlog = {
+      title: 'A Title',
+      author: 'An Author',
+      url: 'A URL',
+      likes: 0,
+    };
+
+    await api
+      .post('/api/blogs')
+      .set('Authorization', '')
+      .send(newBlog)
+      .expect(401);
+  });
 });
 
 describe('tests for users', () => {
@@ -114,7 +144,11 @@ describe('tests for users', () => {
       password: 'ss',
     };
 
-    const response = await api.post('/api/users').send(invalidUser).expect(400);
+    const response = await api
+      .post('/api/users')
+      .set('Authorization', token)
+      .send(invalidUser)
+      .expect(400);
 
     expect(Object.keys(response.body)).toContain('error');
   });
@@ -130,7 +164,7 @@ describe('tests for users', () => {
       password: 'ss',
     };
 
-    await api.post('/api/users').send(invalidUser);
+    await api.post('/api/users').set('Authorization', token).send(invalidUser);
 
     const currLength = userDb.length;
 
