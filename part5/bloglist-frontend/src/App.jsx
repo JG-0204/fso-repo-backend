@@ -97,7 +97,7 @@ const App = () => {
         showNotification(`${blog.title} by ${blog.author} has been deleted.`);
       }
     } catch (exception) {
-      console.error(error);
+      console.error('error');
     }
   };
 
