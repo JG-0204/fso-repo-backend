@@ -1,7 +1,8 @@
 import { useState } from 'react';
 
-const Blog = ({ blog }) => {
+const Blog = ({ blog, likeUpdater, deleteBlog, currUser }) => {
   const [showDetails, setShowDetails] = useState(false);
+  const addedBy = blog.user.name;
 
   const blogStyle = {
     paddingTop: 5,
@@ -16,6 +17,24 @@ const Blog = ({ blog }) => {
     padding: 5,
   };
 
+  const handleLikeButton = (e) => {
+    e.preventDefault();
+
+    likeUpdater(blog);
+  };
+
+  const handleRemoveButton = (e) => {
+    e.preventDefault();
+
+    deleteBlog(blog);
+  };
+
+  const showRemoveButton = () => {
+    if (currUser === addedBy) {
+      return <button onClick={handleRemoveButton}>remove</button>;
+    }
+  };
+
   return (
     <>
       <div style={blogStyle}>
@@ -27,9 +46,10 @@ const Blog = ({ blog }) => {
           <div style={blogDetailsStyle}>
             {blog.url}
             <div>
-              {blog.likes} <button>like</button>
+              {blog.likes} <button onClick={handleLikeButton}>like</button>
             </div>
-            {blog.author}
+            {addedBy}
+            {showRemoveButton()}
           </div>
         )}
       </div>

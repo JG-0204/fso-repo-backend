@@ -20,20 +20,27 @@ const App = () => {
   const blogFormRef = useRef();
 
   useEffect(() => {
-    if (user) {
-      blogService.getAll().then((blogs) => setBlogs(blogs));
-    }
+    (async () => {
+      if (user) {
+        const blogs = await blogService.getAll();
+        setBlogs(sortBlogsByMostLikes(blogs));
+      }
+    })();
   }, [user, isUpdating]);
 
   useEffect(() => {
-    const loggedInUser = localStorage.getItem('loggedInUser');
+    (async () => {
+      const loggedInUser = localStorage.getItem('loggedInUser');
 
-    if (loggedInUser) {
-      const user = JSON.parse(loggedInUser);
-      setUser(user);
-      blogService.setToken(user.token);
-    }
+      if (loggedInUser) {
+        const user = JSON.parse(loggedInUser);
+        setUser(user);
+        blogService.setToken(user.token);
+      }
+    })();
   }, []);
+
+  const sortBlogsByMostLikes = (blog) => blog.sort((a, b) => a.likes < b.likes);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -44,12 +51,7 @@ const App = () => {
       setUser(user);
       blogService.setToken(user.token);
     } catch (exception) {
-      setIsShowing(true);
-      setMessage('Wrong username or password');
-      setTimeout(() => {
-        setIsShowing(false);
-        setMessage('');
-      }, 4000);
+      showNotification('Wrong username or password.');
     }
     setUsername('');
     setPassword('');
@@ -67,15 +69,45 @@ const App = () => {
       blogFormRef.current.toggleVisibility();
       await blogService.create(newBlog);
       isUpdating ? setIsUpdating(false) : setIsUpdating(true);
-      setIsShowing(true);
-      setMessage(`A new blog ${newBlog.title} is added by ${newBlog.author}.`);
-      setTimeout(() => {
-        setIsShowing(false);
-        setMessage('');
-      }, 4000);
+      showNotification(
+        `A new blog ${newBlog.title} by ${newBlog.author} has been added.`,
+      );
     } catch (exception) {
       console.log('Error');
     }
+  };
+
+  const likeBlog = async (blog) => {
+    try {
+      await blogService.updateBlogLikes(blog);
+      isUpdating ? setIsUpdating(false) : setIsUpdating(true);
+    } catch (exception) {
+      console.error('some error');
+    }
+  };
+
+  const deleteBlog = async (blog) => {
+    try {
+      const question = window.confirm(
+        `Remove ${blog.title} by ${blog.author}?`,
+      );
+      if (question) {
+        await blogService.deleteBlog(blog);
+        isUpdating ? setIsUpdating(false) : setIsUpdating(true);
+        showNotification(`${blog.title} by ${blog.author} has been deleted.`);
+      }
+    } catch (exception) {
+      console.error(error);
+    }
+  };
+
+  const showNotification = (message) => {
+    setIsShowing(true);
+    setMessage(message);
+    setTimeout(() => {
+      setIsShowing(false);
+      setMessage('');
+    }, 4000);
   };
 
   const showLoginForm = () => {
@@ -127,7 +159,13 @@ const App = () => {
 
           <div>
             {blogs.map((blog) => (
-              <Blog blog={blog} key={blog.id} />
+              <Blog
+                blog={blog}
+                key={blog.id}
+                likeUpdater={likeBlog}
+                deleteBlog={deleteBlog}
+                currUser={user.name}
+              />
             ))}
           </div>
         </div>
