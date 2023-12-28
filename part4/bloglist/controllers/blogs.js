@@ -29,9 +29,7 @@ blogsRouter.post('/', async (request, response, next) => {
 });
 
 blogsRouter.get('/', async (request, response, next) => {
-  // const blogs = await Blog.find({}).populate('user', { username: 1, name: 1 });
-  // response.json(blogs);
-  const blogs = await Blog.find({});
+  const blogs = await Blog.find({}).populate('user', { username: 1, name: 1 });
   response.json(blogs);
 });
 
@@ -47,7 +45,7 @@ blogsRouter.put('/:id', async (request, response, next) => {
     title: body.title,
     author: body.author,
     url: body.url,
-    likes: body.likes,
+    likes: body.likes + 1,
   };
 
   const newBlog = await Blog.findByIdAndUpdate(request.params.id, blog, {
