@@ -43,7 +43,7 @@ const Blog = ({ blog, likeUpdater, deleteBlog, currUser }) => {
           {showDetails ? 'hide' : 'view'}
         </button>
         {showDetails && (
-          <div style={blogDetailsStyle}>
+          <div style={blogDetailsStyle} className="blogDetails">
             {blog.url}
             <div>
               {blog.likes} <button onClick={handleLikeButton}>like</button>
