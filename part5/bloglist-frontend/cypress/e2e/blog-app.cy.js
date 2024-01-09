@@ -24,4 +24,25 @@ describe('Blog app', function () {
 
     cy.contains('ssss logged in').should('not.exist');
   });
+
+  describe('Login', function () {
+    it('succeeds with correct credentials', function () {
+      cy.get('#username').type('ssss');
+      cy.get('#password').type('ssss');
+
+      cy.get('button').click();
+
+      cy.contains('ssss logged in').should('exist');
+    });
+
+    it('fails with wrong credentinals', function () {
+      cy.get('#username').type('ssss');
+      cy.get('#password').type('invalidpassword');
+
+      cy.get('button').click();
+
+      cy.get('#notif').should('be.visible');
+      cy.get('#notif').should('have.css', 'border-color', 'rgb(255, 0, 0)');
+    });
+  });
 });
