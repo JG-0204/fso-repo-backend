@@ -8,7 +8,14 @@ describe('Blog app', function () {
       name: 'ssss',
     };
 
+    const testUser2 = {
+      username: 'dddd',
+      password: 'dddd',
+      name: 'dddd',
+    };
+
     cy.request('POST', `${Cypress.env('BACKEND')}/users`, testUser);
+    cy.request('POST', `${Cypress.env('BACKEND')}/users`, testUser2);
 
     cy.visit('');
   });
@@ -97,6 +104,35 @@ describe('Blog app', function () {
         cy.get('.blog').find('button').contains('remove').click();
 
         cy.get('.blog').should('not.exist');
+      });
+
+      it.only('user can only see remove button if user created the blog', function () {
+        // logout curr user
+        cy.contains('logout').click();
+
+        // login other user
+        cy.get('#username').type('dddd');
+        cy.get('#password').type('dddd');
+        cy.get('button').click();
+
+        // check if curr user created the blog if not then check if it has remove button
+        cy.get('.blog').find('button').click();
+        cy.get('.blog').contains('dddd').should('not.exist');
+        cy.get('.blog').find('button').contains('remove').should('not.exist');
+
+        // create new blog
+        cy.get('#newBlogBtn').click();
+
+        cy.get('#titleInput').type('A blog title ');
+        cy.get('#authorInput').type('A blog author ');
+        cy.get('#urlInput').type('A blog url ');
+
+        cy.get('#addBlogBtn').click();
+
+        // check if it the creator is the curr user and if it has remove button
+        cy.get('.blog').find('button').contains('view').click();
+        cy.get('.blog').contains('dddd').should('exist');
+        cy.get('.blog').find('button').contains('remove').should('exist');
       });
     });
   });
