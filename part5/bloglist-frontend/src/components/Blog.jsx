@@ -31,22 +31,32 @@ const Blog = ({ blog, likeUpdater, deleteBlog, currUser }) => {
 
   const showRemoveButton = () => {
     if (currUser === addedBy) {
-      return <button onClick={handleRemoveButton}>remove</button>;
+      return (
+        <button onClick={handleRemoveButton} data-cy="removeBlog">
+          remove
+        </button>
+      );
     }
   };
 
   return (
     <>
-      <div style={blogStyle} className="blog">
+      <div style={blogStyle} data-cy="blog">
         {blog.title} {blog.author}
-        <button onClick={() => setShowDetails(showDetails ? false : true)}>
+        <button
+          onClick={() => setShowDetails(showDetails ? false : true)}
+          data-cy="viewBlog"
+        >
           {showDetails ? 'hide' : 'view'}
         </button>
         {showDetails && (
-          <div style={blogDetailsStyle} className="blogDetails">
+          <div style={blogDetailsStyle} data-cy="blogDetails">
             {blog.url}
             <div>
-              {blog.likes} <button onClick={handleLikeButton}>like</button>
+              {blog.likes}
+              <button onClick={handleLikeButton} data-cy="likeBlog">
+                like
+              </button>
             </div>
             {addedBy}
             {showRemoveButton()}

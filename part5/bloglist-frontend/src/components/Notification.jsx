@@ -7,7 +7,7 @@ const Notification = ({ message }) => {
     marginBottom: '1rem',
   };
   return (
-    <div style={style} id="notif">
+    <div style={style} data-cy="notif">
       {message}
     </div>
   );
