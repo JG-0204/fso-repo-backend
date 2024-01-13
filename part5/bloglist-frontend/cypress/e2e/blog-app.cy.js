@@ -148,6 +148,34 @@ describe('Blog app', function () {
         cy.get('@blog').contains('dddd').should('exist');
         cy.get('[data-cy="removeBlog"]').should('exist');
       });
+
+      it.only('Blog is ordered by most likes', function () {
+        // like blog
+        cy.get('[data-cy="blog"]').as('blog');
+
+        cy.get('[data-cy="viewBlog"]').click();
+        cy.get('[data-cy="likeBlog"]').click();
+        cy.get('@blog').should('contain', '1');
+
+        cy.get('[data-cy="likeBlog"]').click();
+        cy.get('@blog').should('contain', '1');
+
+        // create new blog
+        cy.get('[data-cy="newBlog"]').click();
+
+        cy.get('[data-cy="titleInp"]').type('A blog title with less likes');
+        cy.get('[data-cy="authorInp"]').type('A blog author');
+        cy.get('[data-cy="urlInp"]').type('A blog url');
+
+        cy.get('[data-cy="createBlog"]').click();
+
+        cy.get('[data-cy="viewBlog"]').eq(1).click();
+        cy.get('[data-cy="likeBlog"]').eq(1).click();
+
+        cy.get('@blog').eq(1).should('contain', '1');
+
+        cy.get('@blog').eq(1).should('contain', 'A blog title with less likes');
+      });
     });
   });
 });
