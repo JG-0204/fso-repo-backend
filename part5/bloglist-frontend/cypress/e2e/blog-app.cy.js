@@ -59,20 +59,15 @@ describe('Blog app', function () {
 
   describe('When logged in', function () {
     beforeEach(function () {
-      cy.get('[data-cy="username"]').type('ssss');
-      cy.get('[data-cy="password"]').type('ssss');
-
-      cy.get('[data-cy="login"]').click();
+      cy.login({ username: 'ssss', password: 'ssss' });
     });
 
     it('A blog can be created', function () {
-      cy.get('[data-cy="newBlog"]').click();
-
-      cy.get('[data-cy="titleInp"]').type('A blog title');
-      cy.get('[data-cy="authorInp"]').type('A blog author');
-      cy.get('[data-cy="urlInp"]').type('A blog url');
-
-      cy.get('[data-cy="createBlog"]').click();
+      cy.createBlog({
+        title: 'A blog title',
+        author: 'A blog author',
+        url: 'A url',
+      });
 
       cy.get('[data-cy="blog"]').as('blog');
 
@@ -85,13 +80,11 @@ describe('Blog app', function () {
 
     describe('When there is 1 or more blog', function () {
       beforeEach(function () {
-        cy.get('[data-cy="newBlog"]').click();
-
-        cy.get('[data-cy="titleInp"]').type('A blog title');
-        cy.get('[data-cy="authorInp"]').type('A blog author');
-        cy.get('[data-cy="urlInp"]').type('A blog url');
-
-        cy.get('[data-cy="createBlog"]').click();
+        cy.createBlog({
+          title: 'A blog title',
+          author: 'A blog author',
+          url: 'A url',
+        });
       });
 
       it('A user can like a blog', function () {
@@ -123,9 +116,7 @@ describe('Blog app', function () {
         cy.contains('logout').click();
 
         // login other user
-        cy.get('[data-cy="username"]').type('dddd');
-        cy.get('[data-cy="password"').type('dddd');
-        cy.get('[data-cy="login"]').click();
+        cy.login({ username: 'dddd', password: 'dddd' });
 
         // check if curr user created the blog if not then check if it has remove button
         cy.get('@blog').should('exist');
@@ -135,13 +126,11 @@ describe('Blog app', function () {
         cy.get('@blog').find('button').contains('remove').should('not.exist');
 
         // create new blog
-        cy.get('[data-cy="newBlog"]').click();
-
-        cy.get('[data-cy="titleInp"]').type('A blog title');
-        cy.get('[data-cy="authorInp"]').type('A blog author');
-        cy.get('[data-cy="urlInp"]').type('A blog url');
-
-        cy.get('[data-cy="createBlog"]').click();
+        cy.createBlog({
+          title: 'A blog title',
+          author: 'A blog author',
+          url: 'A url',
+        });
 
         // check if it the creator is the curr user and if it has remove button
         cy.get('@viewBtn').eq(1).click();
@@ -149,32 +138,19 @@ describe('Blog app', function () {
         cy.get('[data-cy="removeBlog"]').should('exist');
       });
 
-      it.only('Blog is ordered by most likes', function () {
-        // like blog
-        cy.get('[data-cy="blog"]').as('blog');
-
-        cy.get('[data-cy="viewBlog"]').click();
-        cy.get('[data-cy="likeBlog"]').click();
-        cy.get('@blog').should('contain', '1');
-
-        cy.get('[data-cy="likeBlog"]').click();
-        cy.get('@blog').should('contain', '1');
-
+      it('Blog is ordered by most likes', function () {
         // create new blog
-        cy.get('[data-cy="newBlog"]').click();
-
-        cy.get('[data-cy="titleInp"]').type('A blog title with less likes');
-        cy.get('[data-cy="authorInp"]').type('A blog author');
-        cy.get('[data-cy="urlInp"]').type('A blog url');
-
-        cy.get('[data-cy="createBlog"]').click();
+        cy.createBlog({
+          title: 'A blog title with more likes',
+          author: 'A blog author',
+          url: 'A blog url',
+        });
 
         cy.get('[data-cy="viewBlog"]').eq(1).click();
-        cy.get('[data-cy="likeBlog"]').eq(1).click();
-
-        cy.get('@blog').eq(1).should('contain', '1');
-
-        cy.get('@blog').eq(1).should('contain', 'A blog title with less likes');
+        cy.get('[data-cy="likeBlog"]').click();
+        cy.get('[data-cy="blog"]')
+          .eq(0)
+          .should('contain', 'A blog title with more likes');
       });
     });
   });

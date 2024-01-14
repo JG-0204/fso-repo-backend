@@ -15,18 +15,16 @@ const App = () => {
   const [isShowing, setIsShowing] = useState(false);
   const [message, setMessage] = useState('');
 
-  const [isUpdating, setIsUpdating] = useState(true);
-
   const blogFormRef = useRef();
 
   useEffect(() => {
     (async () => {
       if (user) {
         const blogs = await blogService.getAll();
-        setBlogs(sortBlogsByMostLikes(blogs));
+        setBlogs(blogs);
       }
     })();
-  }, [user, isUpdating]);
+  }, [user]);
 
   useEffect(() => {
     (async () => {
@@ -40,7 +38,7 @@ const App = () => {
     })();
   }, []);
 
-  const sortBlogsByMostLikes = (blog) => blog.sort((a, b) => a.likes < b.likes);
+  const sortByLike = (blogs) => blogs.sort((a, b) => b.likes - a.likes);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -67,8 +65,9 @@ const App = () => {
   const addBlog = async (newBlog) => {
     try {
       blogFormRef.current.toggleVisibility();
-      await blogService.create(newBlog);
-      isUpdating ? setIsUpdating(false) : setIsUpdating(true);
+      const blog = await blogService.create(newBlog);
+      setBlogs(blogs.concat(blog));
+      setBlogs(await blogService.getAll());
       showNotification(
         `A new blog ${newBlog.title} by ${newBlog.author} has been added.`,
       );
@@ -80,7 +79,7 @@ const App = () => {
   const likeBlog = async (blog) => {
     try {
       await blogService.updateBlogLikes(blog);
-      isUpdating ? setIsUpdating(false) : setIsUpdating(true);
+      setBlogs(await blogService.getAll());
     } catch (exception) {
       console.error('some error');
     }
@@ -93,7 +92,7 @@ const App = () => {
       );
       if (question) {
         await blogService.deleteBlog(blog);
-        isUpdating ? setIsUpdating(false) : setIsUpdating(true);
+        setBlogs(await blogService.getAll());
         showNotification(`${blog.title} by ${blog.author} has been deleted.`);
       }
     } catch (exception) {
@@ -162,7 +161,7 @@ const App = () => {
           {showNewBlogForm()}
 
           <div>
-            {blogs.map((blog) => (
+            {sortByLike(blogs).map((blog) => (
               <Blog
                 blog={blog}
                 key={blog.id}
