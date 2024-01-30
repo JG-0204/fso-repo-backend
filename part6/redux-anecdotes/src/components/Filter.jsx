@@ -1,13 +1,13 @@
 import { useDispatch } from 'react-redux';
-import { search } from '../reducers/filterReducer';
+import { filterByText } from '../reducers/filterReducer';
 
 const Filter = () => {
   const dispatch = useDispatch();
 
   const handleChange = (event) => {
     // input-field value is in variable event.target.value
-    event.preventDefault();
-    dispatch(search(event.target.value));
+
+    dispatch(filterByText(event.target.value));
   };
   const style = {
     marginBottom: 10,
