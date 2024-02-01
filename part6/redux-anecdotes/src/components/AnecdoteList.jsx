@@ -20,11 +20,17 @@ const AnecdoteList = () => {
     useSelector((state) => state),
   );
 
-  const vote = (id) => {
-    dispatch(voteAnecdote(id));
+  const vote = async (id) => {
+    const anecdote = anecdotes.find((a) => a.id === id);
+    const changedAnecdote = {
+      ...anecdote,
+      votes: anecdote.votes + 1,
+    };
 
-    const currAnecdote = anecdotes.find((a) => a.id === id).content;
-    dispatch(showMessage(`You voted for ${currAnecdote}`));
+    dispatch(voteAnecdote(changedAnecdote));
+
+    // const currAnecdote = anecdotes.find((a) => a.id === id).content;
+    dispatch(showMessage(`You voted for ${anecdote.content}`));
     setTimeout(() => {
       dispatch(removeMessage(null));
     }, 5000);
