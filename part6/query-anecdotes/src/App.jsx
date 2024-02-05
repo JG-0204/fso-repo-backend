@@ -1,12 +1,58 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import AnecdoteForm from './components/AnecdoteForm';
 import Notification from './components/Notification';
-import { getAll } from './services';
+import { getAll, createNew, update } from './services';
+import { useNotificationDispatch } from './hooks';
+import { useState } from 'react';
 
 const App = () => {
-  const handleVote = (anecdote) => {
-    console.log('vote');
+  const [timeoutId, setTimeoutId] = useState(null);
+  const queryClient = useQueryClient();
+  const dispatch = useNotificationDispatch();
+
+  const showNotification = (type, payload, seconds) => {
+    if (timeoutId) {
+      // console.log('clearing timeout', timeoutId);
+      clearTimeout(timeoutId);
+    }
+
+    dispatch({ type, payload });
+
+    const timeout = setTimeout(() => {
+      dispatch({ type: 'REMOVE', payload: '' });
+    }, seconds * 1000);
+
+    // console.log('setting new timeout', timeout);
+    setTimeoutId(timeout);
   };
+
+  const handleVote = (anecdote) => {
+    updateAnecdoteMutation.mutate({ ...anecdote, votes: anecdote.votes + 1 });
+    showNotification('VOTE', anecdote.content, 5);
+  };
+
+  const updateAnecdoteMutation = useMutation({
+    mutationFn: update,
+    onSuccess: (updatedAnecdote) => {
+      queryClient.setQueryData(
+        ['anecdotes'],
+        anecdotes.map((a) =>
+          a.id !== updatedAnecdote.id ? a : updatedAnecdote,
+        ),
+      );
+    },
+  });
+
+  const handleCreate = useMutation({
+    mutationFn: createNew,
+    onSuccess: (newAnecdote) => {
+      const data = queryClient.getQueryData(['anecdotes']);
+      queryClient.setQueryData(['anecdotes'], data.concat(newAnecdote));
+    },
+    onError: () => {
+      showNotification('ERROR', '', 5);
+    },
+  });
 
   const result = useQuery({
     queryKey: ['anecdotes'],
@@ -14,7 +60,7 @@ const App = () => {
     refetchOnWindowFocus: false,
   });
 
-  console.log(JSON.parse(JSON.stringify(result)));
+  // console.log(JSON.parse(JSON.stringify(result)));
 
   if (result.isPending) {
     return <span>Loading....</span>;
@@ -31,7 +77,10 @@ const App = () => {
       <h3>Anecdote app</h3>
 
       <Notification />
-      <AnecdoteForm />
+      <AnecdoteForm
+        addAnecdoteMutation={handleCreate}
+        showNotif={showNotification}
+      />
 
       {anecdotes.map((anecdote) => (
         <div key={anecdote.id}>

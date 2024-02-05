@@ -1,11 +1,10 @@
-import { createNew } from '../services';
-
-const AnecdoteForm = () => {
+const AnecdoteForm = ({ addAnecdoteMutation, showNotif }) => {
   const onCreate = (event) => {
     event.preventDefault();
     const content = event.target.anecdote.value;
     event.target.anecdote.value = '';
-    console.log('new anecdote');
+    addAnecdoteMutation.mutate({ content, votes: 0 });
+    showNotif('ADD', content, 5);
   };
 
   return (
