@@ -6,14 +6,21 @@ import loginService from './services/login';
 import BlogForm from './components/BlogForm';
 import Togglable from './components/Togglable';
 
+import { useDispatch } from 'react-redux';
+import {
+  setNotification,
+  removeNotification,
+} from './reducers/notificationReducer';
+
 const App = () => {
+  const dispatch = useDispatch();
+
   const [blogs, setBlogs] = useState([]);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [user, setUser] = useState(null);
 
   const [isShowing, setIsShowing] = useState(false);
-  const [message, setMessage] = useState('');
 
   const blogFormRef = useRef();
 
@@ -39,6 +46,15 @@ const App = () => {
   }, []);
 
   const sortByLike = blogs => blogs.sort((a, b) => b.likes - a.likes);
+
+  const showNotification = message => {
+    setIsShowing(true);
+    dispatch(setNotification(message));
+    setTimeout(() => {
+      setIsShowing(false);
+      dispatch(removeNotification());
+    }, 4000);
+  };
 
   const handleLogin = async e => {
     e.preventDefault();
@@ -100,15 +116,6 @@ const App = () => {
     }
   };
 
-  const showNotification = message => {
-    setIsShowing(true);
-    setMessage(message);
-    setTimeout(() => {
-      setIsShowing(false);
-      setMessage('');
-    }, 4000);
-  };
-
   const showLoginForm = () => {
     return (
       <form onSubmit={handleLogin}>
@@ -149,7 +156,7 @@ const App = () => {
     <div>
       <h1>Blogs</h1>
 
-      {isShowing && <Notification message={message} />}
+      {isShowing && <Notification />}
 
       {!user && showLoginForm()}
       {user && (

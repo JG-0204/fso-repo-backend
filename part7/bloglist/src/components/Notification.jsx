@@ -1,4 +1,8 @@
-const Notification = ({ message }) => {
+import { useSelector } from 'react-redux';
+
+const Notification = () => {
+  const message = useSelector(state => state.notif);
+
   const style = {
     padding: '2rem 0.5rem',
     fontSize: '18px',
