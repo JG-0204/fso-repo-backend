@@ -1,23 +1,27 @@
 import { useState, useEffect, useRef } from 'react';
 import Blog from './components/Blog';
 import Notification from './components/Notification';
-import blogService from './services/blogs';
-import loginService from './services/login';
 import BlogForm from './components/BlogForm';
 import Togglable from './components/Togglable';
 
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchBlogs } from './reducers/blogsReducer';
-import { showNotification } from './reducers/notificationReducer';
+import {
+  loginUser,
+  logoutUser,
+  loginIfUserExist,
+} from './reducers/loginReducer';
+
+import { sortByLike } from './util';
 
 const App = () => {
   const dispatch = useDispatch();
 
   const blogs = useSelector(state => state.blogs);
+  const user = useSelector(state => state.login);
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [user, setUser] = useState(null);
 
   const blogFormRef = useRef();
 
@@ -28,59 +32,21 @@ const App = () => {
   }, [user]);
 
   useEffect(() => {
-    const loggedInUser = localStorage.getItem('loggedInUser');
-
-    if (loggedInUser) {
-      const user = JSON.parse(loggedInUser);
-      setUser(user);
-      blogService.setToken(user.token);
-    }
+    dispatch(loginIfUserExist());
   }, []);
-
-  const sortByLike = blogs => {
-    if (blogs) {
-      return blogs.toSorted((a, b) => b.likes - a.likes);
-    }
-    return blogs;
-  };
 
   const handleLogin = async e => {
     e.preventDefault();
-
-    try {
-      const user = await loginService.login({ username, password });
-      console.log(user);
-      localStorage.setItem('loggedInUser', JSON.stringify(user));
-      setUser(user);
-      blogService.setToken(user.token);
-    } catch (exception) {
-      dispatch(showNotification('Wrong username or password.'));
-    }
+    dispatch(loginUser(username, password));
     setUsername('');
     setPassword('');
   };
 
   const handleLogout = e => {
     e.preventDefault();
-    localStorage.clear();
-    setUser(null);
+    dispatch(logoutUser());
     showLoginForm();
   };
-
-  // const deleteBlog = async blog => {
-  //   try {
-  //     const confirm = window.confirm(
-  //       `Remove ${blog.title} by ${blog.author}?`
-  //     );
-  //     if (question) {
-  //       await blogService.deleteBlog(blog);
-  //       setBlogs(await blogService.getAll());
-  //       showNotification(`${blog.title} by ${blog.author} has been deleted.`);
-  //     }
-  //   } catch (exception) {
-  //     console.error('error');
-  //   }
-  // };
 
   const showLoginForm = () => {
     return (
