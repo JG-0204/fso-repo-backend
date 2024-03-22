@@ -13,6 +13,13 @@ usersRouter.get('/', async (request, response, next) => {
   response.json(users);
 });
 
+usersRouter.get('/:id', async (request, response, next) => {
+  const user = await User.findById(request.params.id).populate('blogs', {
+    title: 1,
+  });
+  return response.status(201).json(user);
+});
+
 usersRouter.post('/', async (request, response, next) => {
   const { username, name, password } = request.body;
 
