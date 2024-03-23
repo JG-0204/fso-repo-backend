@@ -31,7 +31,7 @@ const LoggedInView = ({ blogs, user }) => {
 
       <div>
         {sortByLike(blogs).map(blog => (
-          <Blog blog={blog} key={blog.id} currUser={user} />
+          <Blog key={blog.id} blog={blog} />
         ))}
       </div>
     </div>
