@@ -3,6 +3,7 @@ import { useLoaderData, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { likeBlog, deleteBlog } from '../reducers/blogsReducer';
 import { showNotification } from '../reducers/notificationReducer';
+import Navigation from './Navigation';
 
 const BlogView = () => {
   const dispatch = useDispatch();
@@ -41,8 +42,13 @@ const BlogView = () => {
 
   return (
     <div>
+      <Navigation />
+      <h1>Blog App</h1>
+
       <h2>{blog.title}</h2>
-      <p>{blog.url}</p>
+      <a href={blog.url} target='_blank'>
+        {blog.url}
+      </a>
       <p>
         {blog.likes} like/s
         <button onClick={() => dispatch(likeBlog(blog))} data-cy='likeBlog'>

@@ -1,11 +1,14 @@
 import { useLoaderData } from 'react-router-dom';
 import { Link } from 'react-router-dom';
+import Navigation from './Navigation';
 
 const Users = () => {
   const users = useLoaderData();
 
   return (
     <div>
+      <Navigation />
+      <h1>Blog App</h1>
       <h2>Users</h2>
       <table>
         <thead>

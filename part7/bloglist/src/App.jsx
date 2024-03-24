@@ -5,13 +5,11 @@ import { loginIfUserExist } from './reducers/loginReducer';
 
 import BlogsPage from './components/BlogsPage';
 import Notification from './components/Notification';
-
-import { Outlet } from 'react-router-dom';
+import Navigation from './components/Navigation';
 
 const App = () => {
   const dispatch = useDispatch();
 
-  const blogs = useSelector(state => state.blogs);
   const user = useSelector(state => state.login);
 
   useEffect(() => {
@@ -26,10 +24,10 @@ const App = () => {
 
   return (
     <div>
-      <h1>Blogs</h1>
+      {user ? <Navigation /> : ''}
       <Notification />
-      <BlogsPage blogs={blogs} user={user} />
-      <Outlet />
+      <h1>Blog App</h1>
+      <BlogsPage />
     </div>
   );
 };

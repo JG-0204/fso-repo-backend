@@ -12,7 +12,7 @@ const Blog = ({ blog }) => {
     <>
       <div style={blogStyle} data-cy='blog'>
         <Link to={`blogs/${blog.id}`}>
-          {blog.title} {blog.author}
+          {blog.title} by {blog.author}
         </Link>
       </div>
     </>

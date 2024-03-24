@@ -39,6 +39,7 @@ const BlogForm = () => {
       <div>
         title:
         <input
+          id='blog-title'
           data-cy='titleInp'
           type='text'
           value={title}
@@ -49,6 +50,7 @@ const BlogForm = () => {
       <div>
         author:
         <input
+          id='blog-author'
           data-cy='authorInp'
           type='text'
           value={author}
@@ -59,6 +61,7 @@ const BlogForm = () => {
       <div>
         url:
         <input
+          id='blog-url'
           data-cy='urlInp'
           type='text'
           value={url}

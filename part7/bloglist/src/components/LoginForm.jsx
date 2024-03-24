@@ -3,14 +3,17 @@ import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { loginUser } from '../reducers/loginReducer';
 
+import Notification from './Notification';
+
 const LoginForm = () => {
   const dispatch = useDispatch();
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = async e => {
+  const handleLogin = e => {
     e.preventDefault();
+
     dispatch(loginUser(username, password));
     setUsername('');
     setPassword('');
@@ -21,6 +24,7 @@ const LoginForm = () => {
       <div>
         username:
         <input
+          id='username'
           data-cy='username'
           type='text'
           value={username}
@@ -30,6 +34,7 @@ const LoginForm = () => {
       <div>
         password:
         <input
+          id='password'
           data-cy='password'
           type='password'
           value={password}
