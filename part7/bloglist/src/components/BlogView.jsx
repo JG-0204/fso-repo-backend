@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { likeBlog, deleteBlog } from '../reducers/blogsReducer';
 import { showNotification } from '../reducers/notificationReducer';
 import Navigation from './Navigation';
+import Comments from './Comments';
 
 const BlogView = () => {
   const dispatch = useDispatch();
@@ -58,6 +59,14 @@ const BlogView = () => {
 
       <p>added by {author.username}</p>
       {showRemoveButton()}
+
+      <h3>Comments ({blog?.comments?.length})</h3>
+      <Comments blogId={currBlogId} />
+      <ul>
+        {blog.comments.map(comment => (
+          <li key={comment.id}>{comment.content}</li>
+        ))}
+      </ul>
     </div>
   );
 };

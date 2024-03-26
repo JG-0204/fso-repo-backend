@@ -7,6 +7,8 @@ import BlogsPage from './components/BlogsPage';
 import Notification from './components/Notification';
 import Navigation from './components/Navigation';
 
+// revert to latest commit if you can't make it work
+
 const App = () => {
   const dispatch = useDispatch();
 

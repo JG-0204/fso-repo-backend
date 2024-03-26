@@ -50,4 +50,13 @@ export const deleteBlog = blog => {
   };
 };
 
+export const addNewComment = (comment, id) => {
+  return async dispatch => {
+    const blogComment = await blogService.createBlogComment(comment, id);
+    const blog = await blogService.getById(blogComment.blog);
+
+    dispatch(updateBlog(blog));
+  };
+};
+
 export default blogsSlice.reducer;

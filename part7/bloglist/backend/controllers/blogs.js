@@ -1,8 +1,5 @@
 const blogsRouter = require('express').Router();
 const Blog = require('../models/blog');
-const User = require('../models/user');
-
-const jwt = require('jsonwebtoken');
 
 blogsRouter.post('/', async (request, response, next) => {
   const body = request.body;
@@ -28,35 +25,42 @@ blogsRouter.post('/', async (request, response, next) => {
   response.status(201).json(savedBlog);
 });
 
-blogsRouter.get('/', async (request, response, next) => {
-  const blogs = await Blog.find({}).populate('user', {
-    username: 1,
-    name: 1,
+blogsRouter.put('/:id', async (request, response, next) => {
+  const blogId = request.body.id;
+
+  const blogToUpdate = await Blog.findById(blogId);
+
+  const updatedBlog = {
+    ...blogToUpdate.toObject(),
+    likes: blogToUpdate.likes + 1,
+  };
+
+  const newBlog = await Blog.findByIdAndUpdate(blogId, updatedBlog, {
+    new: true,
+  }).populate('comments', {
+    content: 1,
+    id: 1,
   });
+
+  response.json(newBlog);
+});
+
+blogsRouter.get('/', async (request, response, next) => {
+  const blogs = await Blog.find({})
+    .populate('user', {
+      username: 1,
+      name: 1,
+    })
+    .populate('comments', { content: 1, id: 1 });
   response.json(blogs);
 });
 
 blogsRouter.get('/:id', async (request, response, next) => {
-  const blog = await Blog.findById(request.params.id);
-  response.status(201).json(blog);
-});
-
-blogsRouter.put('/:id', async (request, response, next) => {
-  const body = request.body;
-
-  const blog = {
-    title: body.title,
-    author: body.author,
-    url: body.url,
-    likes: body.likes + 1,
-  };
-
-  const newBlog = await Blog.findByIdAndUpdate(request.params.id, blog, {
-    new: true,
+  const blog = await Blog.findById(request.params.id).populate('comments', {
+    content: 1,
+    id: 1,
   });
-  response.json(newBlog);
-
-  return;
+  response.status(200).json(blog);
 });
 
 blogsRouter.delete('/:id', async (request, response, next) => {
