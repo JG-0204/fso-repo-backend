@@ -1,18 +1,15 @@
 import { useLoaderData } from 'react-router-dom';
 import { Link } from 'react-router-dom';
-import Navigation from './Navigation';
 
 const Users = () => {
   const users = useLoaderData();
 
   return (
     <div>
-      <Navigation />
-      <h1>Blog App</h1>
-      <h2>Users</h2>
-      <table>
+      <h2 className='font-bold text-2xl my-8'>Users</h2>
+      <table className='table'>
         <thead>
-          <tr>
+          <tr className='text-lg'>
             <th>Users</th>
             <th>Blog added</th>
           </tr>
@@ -21,7 +18,9 @@ const Users = () => {
           {users?.map(user => (
             <tr key={user.id}>
               <th>
-                <Link to={`${user.id}`}>{user.username}</Link>
+                <Link to={`${user.id}`} className='link text-lg'>
+                  {user.username}
+                </Link>
               </th>
               <td>{user.blogs.length}</td>
             </tr>

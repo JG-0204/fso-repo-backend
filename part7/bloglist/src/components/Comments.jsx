@@ -14,15 +14,21 @@ const Comments = ({ blogId }) => {
   };
 
   return (
-    <form action='submit' onSubmit={handleSubmit}>
+    <form
+      action='submit'
+      onSubmit={handleSubmit}
+      className='flex gap-3 items-center mb-6'>
       <input
+        className='input input-md input-primary w-7/12'
         type='text'
         value={comment}
         onChange={({ target }) => setComment(target.value)}
         id='comment'
-        placeholder='add comment'
+        placeholder='Add new comment'
       />
-      <button type='submit'>Post</button>
+      <button type='submit' className='btn btn-md btn-neutral uppercase'>
+        Post
+      </button>
     </form>
   );
 };

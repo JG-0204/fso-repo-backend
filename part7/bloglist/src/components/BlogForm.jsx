@@ -35,41 +35,45 @@ const BlogForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div>
-        title:
+    <form onSubmit={handleSubmit} className='flex flex-col gap-3'>
+      <label className='input input-bordered input-neutral flex items-center gap-2 w-8/12'>
+        Title
         <input
+          className='w-full'
           id='blog-title'
           data-cy='titleInp'
           type='text'
           value={title}
           onChange={({ target }) => setTitle(target.value)}
-          placeholder='blog title'
+          placeholder='What is the 60-30-10 Rule in Design?'
         />
-      </div>
-      <div>
-        author:
+      </label>
+      <label className='input input-bordered input-neutral flex items-center gap-2 w-8/12'>
+        Author
         <input
           id='blog-author'
           data-cy='authorInp'
           type='text'
           value={author}
           onChange={({ target }) => setAuthor(target.value)}
-          placeholder='blog author'
+          placeholder='Ijelekhai Faith Olohijere'
         />
-      </div>
-      <div>
-        url:
+      </label>
+      <label className='input input-bordered input-neutral flex items-center gap-2 w-8/12'>
+        Url
         <input
           id='blog-url'
           data-cy='urlInp'
           type='text'
           value={url}
           onChange={({ target }) => setUrl(target.value)}
-          placeholder='blog url'
+          placeholder='https://www.freecodecamp.org/news/the-60-30-10-rule-in-design/'
         />
-      </div>
-      <button type='submit' data-cy='createBlog'>
+      </label>
+      <button
+        type='submit'
+        data-cy='createBlog'
+        className='btn btn-sm uppercase btn-neutral self-start mb-3'>
         create
       </button>
     </form>

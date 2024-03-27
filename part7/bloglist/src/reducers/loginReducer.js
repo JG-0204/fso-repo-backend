@@ -2,8 +2,6 @@ import { createSlice } from '@reduxjs/toolkit';
 
 import loginService from '../services/login';
 
-import { showNotification } from './notificationReducer';
-
 import { setToken, saveToLocalStorage, loadFromLocalStorage } from '../util';
 
 const loginSlice = createSlice({
@@ -19,16 +17,10 @@ export const { saveUser, removeUser } = loginSlice.actions;
 
 export const loginUser = (username, password) => {
   return async dispatch => {
-    try {
-      const user = await loginService.login({ username, password });
-      setToken(user.token);
-      saveToLocalStorage('loggedInUser', user);
-      dispatch(saveUser(user));
-    } catch (e) {
-      dispatch(
-        showNotification('Wrong username or password! Enter a proper account.')
-      );
-    }
+    const user = await loginService.login({ username, password });
+    setToken(user.token);
+    saveToLocalStorage('loggedInUser', user);
+    dispatch(saveUser(user));
   };
 };
 
