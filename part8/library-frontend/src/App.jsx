@@ -10,6 +10,9 @@ const App = () => {
         <button>
           <Link to="books">books</Link>
         </button>
+        <button>
+          <Link to="create">add book</Link>
+        </button>
       </div>
       <Outlet />
     </div>

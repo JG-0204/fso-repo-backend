@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import App from './App.jsx';
 import Authors from './components/Authors.jsx';
 import Books from './components/Books.jsx';
+import BookForm from './components/BookForm.jsx';
 
 import { ApolloClient, ApolloProvider, InMemoryCache } from '@apollo/client';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
@@ -24,6 +25,10 @@ const router = createBrowserRouter([
       {
         path: 'books',
         element: <Books />,
+      },
+      {
+        path: '/create',
+        element: <BookForm />,
       },
     ],
   },
