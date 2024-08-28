@@ -1,3 +1,23 @@
+import { getError, isNotANumber } from './util';
+
+interface BmiValues {
+  height: number;
+  weight: number;
+}
+
+const parseArguments = (argv: string[]): BmiValues => {
+  if (argv.length > 4) throw new Error('too many arguments');
+  if (argv.length < 4) throw new Error('not enough arguments');
+
+  if (!isNotANumber(argv[2]) && !isNotANumber(argv[3])) {
+    return {
+      height: Number(argv[2]),
+      weight: Number(argv[3]),
+    };
+  }
+  throw new Error('one or more values is not a number.');
+};
+
 const calculateBmi = (height: number, weight: number) => {
   const heightSquared = height * height;
   const bmi = (weight / heightSquared) * 10000;
@@ -13,4 +33,10 @@ const calculateBmi = (height: number, weight: number) => {
   return `${bmi.toFixed(1)} is in the Obese Range`;
 };
 
-console.log(calculateBmi(180, 60));
+try {
+  const { height, weight } = parseArguments(process.argv);
+  console.log(calculateBmi(height, weight));
+} catch (e: unknown) {
+  const errorMessage = getError(e);
+  console.log(errorMessage);
+}

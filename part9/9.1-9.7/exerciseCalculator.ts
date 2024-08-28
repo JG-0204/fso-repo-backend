@@ -1,3 +1,4 @@
+import { getError, isNotANumber } from './util';
 interface Result {
   periodLength: number;
   trainingDays: number;
@@ -7,6 +8,34 @@ interface Result {
   target: number;
   average: number;
 }
+interface ExerciseValues {
+  hoursPerDay: number[];
+  targetHour: number;
+}
+
+const parseArguments = (argv: string[]): ExerciseValues => {
+  if (argv.length <= 3) throw new Error('not enough arguments');
+
+  let targetHour: number;
+  let hoursPerDay: number[] = [];
+
+  for (let index = 2; index < argv.length; index++) {
+    if (!isNotANumber(argv[index])) {
+      if (index === 2) {
+        targetHour = Number(argv[index]);
+        continue;
+      }
+      hoursPerDay.push(Number(argv[index]));
+    } else {
+      throw new Error('one or more values is not a number');
+    }
+  }
+
+  return {
+    hoursPerDay,
+    targetHour,
+  };
+};
 
 const calculateExercise = (hoursArr: number[], target: number): Result => {
   const exerciseDays = hoursArr.filter((hour) => hour > 0);
@@ -51,4 +80,11 @@ const calculateExercise = (hoursArr: number[], target: number): Result => {
   return result;
 };
 
-console.log(calculateExercise([3, 0, 2, 4.5, 0, 3, 1], 1));
+try {
+  const { hoursPerDay, targetHour } = parseArguments(process.argv);
+  // parseArguments(process.argv);
+  console.log(calculateExercise(hoursPerDay, targetHour));
+} catch (e: unknown) {
+  const errorMessage = getError(e);
+  console.log(errorMessage);
+}
