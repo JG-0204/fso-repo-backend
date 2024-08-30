@@ -18,7 +18,7 @@ const parseArguments = (argv: string[]): BmiValues => {
   throw new Error('one or more values is not a number.');
 };
 
-const calculateBmi = (height: number, weight: number) => {
+export const calculateBmi = (height: number, weight: number) => {
   const heightSquared = height * height;
   const bmi = (weight / heightSquared) * 10000;
 
@@ -33,10 +33,12 @@ const calculateBmi = (height: number, weight: number) => {
   return `${bmi.toFixed(1)} is in the Obese Range`;
 };
 
-try {
-  const { height, weight } = parseArguments(process.argv);
-  console.log(calculateBmi(height, weight));
-} catch (e: unknown) {
-  const errorMessage = getError(e);
-  console.log(errorMessage);
+if (require.main === module) {
+  try {
+    const { height, weight } = parseArguments(process.argv);
+    console.log(calculateBmi(height, weight));
+  } catch (e: unknown) {
+    const errorMessage = getError(e);
+    console.log(errorMessage);
+  }
 }
