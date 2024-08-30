@@ -18,7 +18,7 @@ const parseArguments = (argv: string[]): ExerciseValues => {
   if (isNotANumber(argv[2])) throw new Error('targetHour is not a number');
 
   const targetHour: number = Number(argv[2]);
-  let hoursPerDay: number[] = [];
+  const hoursPerDay: number[] = [];
 
   for (let index = 3; index < argv.length; index++) {
     if (!isNotANumber(argv[index])) {
@@ -34,7 +34,10 @@ const parseArguments = (argv: string[]): ExerciseValues => {
   };
 };
 
-const calculateExercise = (hoursArr: number[], target: number): Result => {
+export const calculateExercise = (
+  hoursArr: number[],
+  target: number
+): Result => {
   const exerciseDays = hoursArr.filter((hour) => hour > 0);
   const exerciseHours = exerciseDays.reduce((a, b) => a + b);
   const average = exerciseDays.reduce((a, b) => a + b) / hoursArr.length;
@@ -77,10 +80,12 @@ const calculateExercise = (hoursArr: number[], target: number): Result => {
   return result;
 };
 
-try {
-  const { hoursPerDay, targetHour } = parseArguments(process.argv);
-  console.log(calculateExercise(hoursPerDay, targetHour));
-} catch (e: unknown) {
-  const errorMessage = getError(e);
-  console.log(errorMessage);
+if (require.main === module) {
+  try {
+    const { hoursPerDay, targetHour } = parseArguments(process.argv);
+    console.log(calculateExercise(hoursPerDay, targetHour));
+  } catch (e: unknown) {
+    const errorMessage = getError(e);
+    console.log(errorMessage);
+  }
 }
