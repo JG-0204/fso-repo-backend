@@ -4,11 +4,11 @@ import { calculateBmi } from './bmiCalculator';
 
 const app = express();
 
-app.use('/hello', (_req, res) => {
+app.get('/hello', (_req, res) => {
   res.send('Hello Fullstack');
 });
 
-app.use('/bmi', (req, res) => {
+app.get('/bmi', (req, res) => {
   if (!req.query.height || !req.query.weight) {
     res.status(400).send({
       error: 'malformatted parameters',
