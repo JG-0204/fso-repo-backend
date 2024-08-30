@@ -15,16 +15,13 @@ interface ExerciseValues {
 
 const parseArguments = (argv: string[]): ExerciseValues => {
   if (argv.length <= 3) throw new Error('not enough arguments');
+  if (isNotANumber(argv[2])) throw new Error('targetHour is not a number');
 
-  let targetHour: number;
+  const targetHour: number = Number(argv[2]);
   let hoursPerDay: number[] = [];
 
-  for (let index = 2; index < argv.length; index++) {
+  for (let index = 3; index < argv.length; index++) {
     if (!isNotANumber(argv[index])) {
-      if (index === 2) {
-        targetHour = Number(argv[index]);
-        continue;
-      }
       hoursPerDay.push(Number(argv[index]));
     } else {
       throw new Error('one or more values is not a number');
@@ -32,8 +29,8 @@ const parseArguments = (argv: string[]): ExerciseValues => {
   }
 
   return {
-    hoursPerDay,
     targetHour,
+    hoursPerDay,
   };
 };
 
@@ -82,7 +79,6 @@ const calculateExercise = (hoursArr: number[], target: number): Result => {
 
 try {
   const { hoursPerDay, targetHour } = parseArguments(process.argv);
-  // parseArguments(process.argv);
   console.log(calculateExercise(hoursPerDay, targetHour));
 } catch (e: unknown) {
   const errorMessage = getError(e);
