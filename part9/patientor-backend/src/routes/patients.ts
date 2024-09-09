@@ -32,6 +32,20 @@ router.post(
   }
 );
 
+router.get('/:id', (req, res) => {
+  const patientId = req.params.id;
+  const patient = patientService.getPatient(patientId);
+
+  if (!patient) {
+    res.send({
+      message: 'Patient not found.',
+    });
+    return;
+  }
+
+  res.send(patient);
+});
+
 const errorMiddleware = (
   e: unknown,
   _req: Request,
