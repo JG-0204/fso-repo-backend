@@ -3,6 +3,7 @@ import { Diary } from '../App';
 const Diaries = ({ diaries }: { diaries: Diary[] }) => {
   return (
     <div>
+      <h2>Diary Entries</h2>
       <ul>
         {diaries.map((diary: Diary) => (
           <li key={diary.id}>

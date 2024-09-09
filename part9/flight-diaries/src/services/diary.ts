@@ -10,9 +10,17 @@ const getAll = async () => {
 };
 
 const createNewDiary = async (newDiary: NewDiary) => {
-  const response = await axios.post(baseUrl, newDiary);
+  try {
+    const response = await axios.post(baseUrl, newDiary);
 
-  return response.data;
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const errorObject = error.response?.data.error[0];
+      const errorMessage = `Incorrect ${errorObject.path[0]}: ${errorObject.received}.`;
+      throw new Error(errorMessage);
+    }
+  }
 };
 
 export default { getAll, createNewDiary };

@@ -19,7 +19,7 @@ const App = () => {
 
   useEffect(() => {
     const fetchDiaries = async () => {
-      const initialDiaries = await diaryService.getAll();
+      const initialDiaries: Diary[] = await diaryService.getAll();
 
       setDiaries(initialDiaries);
     };
@@ -27,10 +27,14 @@ const App = () => {
     fetchDiaries();
   }, []);
 
+  const addNewDiary = (newEntry: Diary) => {
+    setDiaries((diaries) => diaries.concat(newEntry));
+  };
+
   return (
     <div>
       <h1>Illari's flight diaries</h1>
-      <FlightDiaryForm />
+      <FlightDiaryForm add={addNewDiary} />
       <Diaries diaries={diaries} />
     </div>
   );

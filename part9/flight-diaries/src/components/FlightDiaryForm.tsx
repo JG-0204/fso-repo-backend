@@ -1,73 +1,143 @@
 import { useState } from 'react';
+import { NewDiary, Diary } from '../App';
 import diaryService from '../services/diary';
 
-const FlightDiaryForm = () => {
+interface FlightDiaryFormProps {
+  add: (args: Diary) => void;
+}
+
+const FlightDiaryForm = ({ add }: FlightDiaryFormProps) => {
   const [date, setDate] = useState('');
   const [visibility, setVisibility] = useState('');
   const [weather, setWeather] = useState('');
   const [comment, setComment] = useState('');
 
-  const onAddDiary = (event: React.SyntheticEvent) => {
+  const [error, setError] = useState('');
+
+  const onAddDiary = async (event: React.SyntheticEvent) => {
     event.preventDefault();
 
-    const diaryToAdd = {
-      date,
-      visibility,
-      weather,
-      comment,
-    };
+    try {
+      const diaryToAdd: NewDiary = {
+        date,
+        visibility,
+        weather,
+        comment,
+      };
 
-    diaryService.createNewDiary(diaryToAdd);
+      const newDiary: Diary = await diaryService.createNewDiary(diaryToAdd);
 
-    setDate('');
-    setVisibility('');
-    setWeather('');
-    setComment('');
+      add(newDiary);
+
+      setDate('');
+      setVisibility('');
+      setWeather('');
+      setComment('');
+      setError('');
+    } catch (e: unknown) {
+      let errorMessage;
+      if (e instanceof Error) {
+        errorMessage = `Error: ${e.message}`;
+        setError(errorMessage);
+      }
+    }
   };
 
   return (
-    <form
-      onSubmit={onAddDiary}
-      style={{ display: 'flex', flexDirection: 'column', maxWidth: '300px' }}
-    >
-      <label htmlFor="date">
-        date:
-        <input
-          type="text"
-          name="date"
-          value={date}
-          onChange={({ target }) => setDate(target.value)}
-        />
-      </label>
-      <label htmlFor="visibility">
-        visibility:
-        <input
-          type="text"
-          name="visibility"
-          value={visibility}
-          onChange={({ target }) => setVisibility(target.value)}
-        />
-      </label>
-      <label htmlFor="weather">
-        weather:
-        <input
-          type="text"
-          name="weather"
-          value={weather}
-          onChange={({ target }) => setWeather(target.value)}
-        />
-      </label>
-      <label htmlFor="comment">
-        comment:
-        <input
-          type="text"
-          name="comment"
-          value={comment}
-          onChange={({ target }) => setComment(target.value)}
-        />
-      </label>
-      <button type="submit">add</button>
-    </form>
+    <div>
+      <h2>Add new entry</h2>
+      <form
+        onSubmit={onAddDiary}
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          maxWidth: '500px',
+        }}
+      >
+        <span style={{ color: 'red' }}>{error && error}</span>
+        <label htmlFor="date">
+          date:
+          <input
+            type="date"
+            name="date"
+            value={date}
+            onChange={({ target }) => setDate(target.value)}
+          />
+        </label>
+        <label htmlFor="visibility">
+          <span>visibility: </span>
+          great
+          <input
+            type="radio"
+            name="visibility"
+            onChange={() => setVisibility('great')}
+          />
+          good
+          <input
+            type="radio"
+            name="visibility"
+            onChange={() => setVisibility('good')}
+          />
+          ok
+          <input
+            type="radio"
+            name="visibility"
+            onChange={() => setVisibility('ok')}
+          />
+          poor
+          <input
+            type="radio"
+            name="visibility"
+            onChange={() => setVisibility('poor')}
+          />
+        </label>
+        <label htmlFor="weather">
+          <span>weather: </span>
+          sunny
+          <input
+            type="radio"
+            name="weather"
+            onChange={() => setWeather('sunny')}
+          />
+          rainy
+          <input
+            type="radio"
+            name="weather"
+            onChange={() => setWeather('rainy')}
+          />
+          cloudy
+          <input
+            type="radio"
+            name="weather"
+            onChange={() => setWeather('cloudy')}
+          />
+          stormy
+          <input
+            type="radio"
+            name="weather"
+            onChange={() => setWeather('stormy')}
+          />
+          windy
+          <input
+            type="radio"
+            name="weather"
+            onChange={() => setWeather('windy')}
+          />
+        </label>
+        <label htmlFor="comment">
+          comment:
+          <input
+            type="text"
+            name="comment"
+            value={comment}
+            onChange={({ target }) => setComment(target.value)}
+          />
+        </label>
+        <div>
+          <button type="submit">add</button>
+        </div>
+      </form>
+    </div>
   );
 };
 
