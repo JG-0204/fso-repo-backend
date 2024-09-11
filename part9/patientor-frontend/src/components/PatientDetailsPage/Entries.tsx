@@ -1,24 +1,30 @@
-import { Box, Typography } from '@mui/material';
-import { Entry } from '../../types';
+import { Stack, Box, Typography } from '@mui/material';
+import { Diagnosis, Entry } from '../../types';
 
-const Entries = ({ entries }: { entries: Entry[] }) => {
+import EntryCard from './Entry';
+
+interface EntriesProps {
+  entries: Entry[];
+  diagnoses: Diagnosis[];
+}
+
+const Entries = ({ entries, diagnoses }: EntriesProps) => {
+  // const getDiagnosisCodeName = (code: string) => {
+  //   const currCode = diagnoses.find((c) => c.code === code);
+
+  //   return currCode?.name;
+  // };
+
   return (
     <div>
       <Box>
         <Typography variant="h5">Patient Entries</Typography>
       </Box>
-      {Object.values(entries).map((entry: Entry) => (
-        <div key={entry.id}>
-          <p>
-            {entry.date} <em>{entry.description}</em>
-          </p>
-          <ul>
-            {entry.diagnosisCodes?.map((code) => (
-              <li key={code}>{code}</li>
-            ))}
-          </ul>
-        </div>
-      ))}
+      <Stack spacing={2}>
+        {Object.values(entries).map((entry: Entry) => (
+          <EntryCard key={entry.id} entry={entry} />
+        ))}
+      </Stack>
     </div>
   );
 };

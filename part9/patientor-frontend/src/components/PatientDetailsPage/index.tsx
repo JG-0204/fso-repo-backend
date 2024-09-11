@@ -4,13 +4,15 @@ import { Box, Typography } from '@mui/material';
 import { Male, Female, Transgender } from '@mui/icons-material';
 
 import patientService from '../../services/patients';
-import { Patient } from '../../types';
+import diagnosisService from '../../services/diagnoses';
+import { Diagnosis, Patient } from '../../types';
 
 import Entries from './Entries';
 
 const PatientDetailsPage = () => {
   const { id } = useParams();
-  const [patient, setPatient] = useState<Patient | null>(null);
+  const [patient, setPatient] = useState<Patient>();
+  const [diagnoses, setDiagnoses] = useState<Diagnosis[]>([]);
 
   useEffect(() => {
     const fetchPatient = async () => {
@@ -18,7 +20,14 @@ const PatientDetailsPage = () => {
       setPatient(data);
     };
 
+    const fetchDiagnoses = async () => {
+      const data = await diagnosisService.getAll();
+
+      setDiagnoses(data);
+    };
+
     fetchPatient();
+    fetchDiagnoses();
   }, [id]);
 
   if (!patient) {
@@ -42,7 +51,7 @@ const PatientDetailsPage = () => {
         <p>occupation: {patient?.occupation}</p>
       </Box>
       <Box sx={{ mt: 5 }}>
-        <Entries entries={patient.entries} />
+        <Entries entries={patient.entries} diagnoses={diagnoses} />
       </Box>
     </div>
   );
