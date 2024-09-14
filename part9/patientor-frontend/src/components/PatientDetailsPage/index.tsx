@@ -51,7 +51,7 @@ const PatientDetailsPage = () => {
         <p>occupation: {patient?.occupation}</p>
       </Box>
       <Box sx={{ mt: 5 }}>
-        <Entries entries={patient.entries} diagnoses={diagnoses} />
+        <Entries initialEntries={patient.entries} diagnoses={diagnoses} />
       </Box>
     </div>
   );

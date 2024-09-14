@@ -1,5 +1,15 @@
 import { z } from 'zod';
-import { NewEntrySchema } from './utils';
+import {
+  HealthCheckEntrySchema,
+  HospitalEntrySchema,
+  OccupationalHealthcareEntrySchema,
+  NewEntrySchema,
+} from './utils';
+
+// Define special omit for unions
+type UnionOmit<T, K extends string | number | symbol> = T extends unknown
+  ? Omit<T, K>
+  : never;
 
 export type Diagnosis = {
   code: string;
@@ -11,48 +21,6 @@ export enum Gender {
   Male = 'male',
   Female = 'female',
   Other = 'other',
-}
-
-export type Entry =
-  | HealthCheckEntry
-  | HospitalEntry
-  | OccupationalHealthcareEntry;
-
-interface BaseEntry {
-  id: string;
-  description: string;
-  date: string;
-  specialist: string;
-  diagnosisCodes?: Array<Diagnosis['code']>;
-}
-
-export enum HealthCheckRating {
-  'Healthy' = 0,
-  'LowRisk' = 1,
-  'HighRisk' = 2,
-  'CriticalRisk' = 3,
-}
-
-interface HealthCheckEntry extends BaseEntry {
-  type: 'HealthCheck';
-  healthCheckRating: HealthCheckRating;
-}
-
-interface HospitalEntry extends BaseEntry {
-  type: 'Hospital';
-  discharge: {
-    date: string;
-    criteria: string;
-  };
-}
-
-interface OccupationalHealthcareEntry extends BaseEntry {
-  type: 'OccupationalHealthcare';
-  employerName: string;
-  sickLeave?: {
-    startDate: string;
-    endDate: string;
-  };
 }
 
 export interface Patient {
@@ -72,3 +40,33 @@ export type PatientWithoutSsn = Omit<Patient, 'ssn' | 'entries'>;
 export interface NewPatientEntry extends z.infer<typeof NewEntrySchema> {
   entries: Entry[];
 }
+
+export enum HealthCheckRating {
+  'Healthy' = 0,
+  'LowRisk' = 1,
+  'HighRisk' = 2,
+  'CriticalRisk' = 3,
+}
+
+interface HealthCheckEntry extends z.infer<typeof HealthCheckEntrySchema> {
+  id: string;
+  type: 'HealthCheck';
+}
+
+interface HospitalEntry extends z.infer<typeof HospitalEntrySchema> {
+  id: string;
+  type: 'Hospital';
+}
+
+interface OccupationalHealthcareEntry
+  extends z.infer<typeof OccupationalHealthcareEntrySchema> {
+  id: string;
+  type: 'OccupationalHealthcare';
+}
+
+export type Entry =
+  | HealthCheckEntry
+  | HospitalEntry
+  | OccupationalHealthcareEntry;
+
+export type NewEntry = UnionOmit<Entry, 'id'>;
