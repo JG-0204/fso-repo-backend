@@ -37,6 +37,7 @@ const parseBodyByEntryType = (
     }
     if (req.body.type === 'OccupationalHealthcare') {
       OccupationalHealthcareEntrySchema.parse(req.body);
+      next();
     }
   } catch (error) {
     next(error);

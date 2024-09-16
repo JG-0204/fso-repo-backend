@@ -13,24 +13,16 @@ interface EntriesProps {
 
 const Entries = ({ initialEntries, diagnoses }: EntriesProps) => {
   const [entries, setEntries] = useState<Entry[]>(initialEntries);
-  // // const [error, setError] = useState<string>('');
 
-  // const { id } = useParams();
+  const diagnosesCodes = diagnoses.map((diagnosis) => diagnosis.code);
 
-  const addNewEntry = (entry: Entry) => {
+  const updateEntries = (entry: Entry) => {
     if (entry) setEntries((entries) => entries.concat(entry));
   };
 
-  // const getDiagnosisCodeName = (code: string) => {
-  //   const currCode = diagnoses.find((c) => c.code === code);
-
-  //   return currCode?.name;
-  // };
-
   return (
     <div>
-      {/* {error && <Alert severity="error">{error}</Alert>} */}
-      <EntryForm add={addNewEntry} />
+      <EntryForm render={updateEntries} codes={diagnosesCodes} />
       <Box>
         <Typography variant="h5">Patient Entries</Typography>
       </Box>
