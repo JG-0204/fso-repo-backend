@@ -3,6 +3,25 @@ const { startStandaloneServer } = require('@apollo/server/standalone');
 
 const { v1: uuid } = require('uuid');
 
+const mongoose = require('mongoose');
+mongoose.set('strictQuery', false);
+const config = require('./utils/config');
+const Author = require('./models/author');
+const Book = require('./models/book');
+
+const connectToDB = () => {
+  console.log('connecting to ' + config.MONGODB_URI);
+
+  mongoose
+    .connect(config.MONGODB_URI)
+    .then(() => {
+      console.log('connected to db');
+    })
+    .catch((e) => {
+      console.log('Something went wrong ' + e.message);
+    });
+};
+
 let authors = [
   {
     name: 'Robert Martin',
@@ -28,20 +47,6 @@ let authors = [
     id: 'afa5b6f3-344d-11e9-a414-719c6709cf3e',
   },
 ];
-
-/*
- * Suomi:
- * Saattaisi olla järkevämpää assosioida kirja ja sen tekijä tallettamalla kirjan yhteyteen tekijän nimen sijaan tekijän id
- * Yksinkertaisuuden vuoksi tallennamme kuitenkin kirjan yhteyteen tekijän nimen
- *
- * English:
- * It might make more sense to associate a book with its author by storing the author's id in the context of the book instead of the author's name
- * However, for simplicity, we will store the author's name in connection with the book
- *
- * Spanish:
- * Podría tener más sentido asociar un libro con su autor almacenando la id del autor en el contexto del libro en lugar del nombre del autor
- * Sin embargo, por simplicidad, almacenaremos el nombre del autor en conexión con el libro
- */
 
 let books = [
   {
@@ -102,7 +107,7 @@ let books = [
 const typeDefs = `
     type Book {
         title: String!
-        author: String!
+        author: Author!
         published: Int!
         genres: [String]
         id: ID!
@@ -167,22 +172,32 @@ const resolvers = {
   },
 
   Mutation: {
-    addBook: (root, args) => {
-      const isAuthorSaved = authors.map((a) => a.name).includes(args.author);
+    addBook: async (root, args) => {
+      const author = await Author.findOne({ name: args.author }).exec();
 
-      if (!isAuthorSaved) {
-        const newAuthor = {
-          id: uuid(),
-          name: args.author,
-          born: null,
-        };
+      if (!author) {
+        const newAuthor = new Author({ name: args.author });
 
-        authors = authors.concat(newAuthor);
+        newAuthor.save();
+
+        const book = new Book({
+          ...args,
+          author: {
+            _id: newAuthor._id,
+          },
+        });
+        book.save();
+        return book;
       }
 
-      const newBook = { ...args, id: uuid() };
-      books = books.concat(newBook);
-      return newBook;
+      const book = new Book({
+        ...args,
+        author: {
+          _id: author._id,
+        },
+      });
+      book.save();
+      return book;
     },
 
     editAuthor: (root, args) => {
@@ -192,7 +207,7 @@ const resolvers = {
 
       const updatedAuthor = { ...author, born: args.setBornTo };
       authors = authors.map((a) =>
-        a.id !== updatedAuthor.id ? a : updatedAuthor,
+        a.id !== updatedAuthor.id ? a : updatedAuthor
       );
       return updatedAuthor;
     },
@@ -209,3 +224,12 @@ startStandaloneServer(server, {
 }).then(({ url }) => {
   console.log(`Server ready at ${url}`);
 });
+
+connectToDB();
+
+// const addToDb = async () => {
+//   await Author.deleteMany({});
+//   await Book.deleteMany({});
+//   await Author.insertMany(authors);
+// };
+// addToDb();
