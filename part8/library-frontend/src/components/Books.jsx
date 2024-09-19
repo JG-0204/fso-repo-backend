@@ -23,7 +23,7 @@ const Books = () => {
           {books.map((book) => (
             <tr key={book.id}>
               <th style={{ textAlign: 'left' }}>{book.title}</th>
-              <td>{book.author}</td>
+              <td>{book.author.name}</td>
               <td>{book.published}</td>
             </tr>
           ))}
