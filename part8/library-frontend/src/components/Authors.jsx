@@ -1,6 +1,7 @@
 import { useQuery, useMutation } from '@apollo/client';
 import { ALL_AUTHORS, EDIT_AUTHOR } from '../queries';
 import { useState } from 'react';
+import { useOutletContext } from 'react-router-dom';
 
 import Select from 'react-select';
 
@@ -56,6 +57,8 @@ const BirthYearForm = ({ authors }) => {
 const Authors = () => {
   const { loading, data } = useQuery(ALL_AUTHORS);
 
+  const { token } = useOutletContext();
+
   if (loading) return <div>loading...</div>;
 
   const authors = data.allAuthors;
@@ -81,7 +84,7 @@ const Authors = () => {
           ))}
         </tbody>
       </table>
-      <BirthYearForm authors={authors} />
+      {token && <BirthYearForm authors={authors} />}
     </div>
   );
 };
