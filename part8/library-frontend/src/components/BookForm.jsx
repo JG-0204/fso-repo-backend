@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import { useMutation } from '@apollo/client';
 import { CREATE_BOOK, ALL_AUTHORS, ALL_BOOKS } from '../queries';
+import { useOutletContext } from 'react-router-dom';
 
 const BookForm = () => {
+  const { authors } = useOutletContext();
+
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
   const [published, setPublished] = useState('');
@@ -10,18 +13,41 @@ const BookForm = () => {
   const [genres, setGenres] = useState([]);
 
   const [createBook] = useMutation(CREATE_BOOK, {
-    refetchQueries: [{ query: ALL_AUTHORS }, { query: ALL_BOOKS }],
+    update: (cache, response) => {
+      cache.updateQuery({ query: ALL_BOOKS }, ({ allBooks }) => {
+        return {
+          allBooks: allBooks?.concat(response.data?.addBook),
+        };
+      });
+    },
+    refetchQueries: [{ query: ALL_AUTHORS }],
+    onQueryUpdated: (observableQuery) => {
+      const shouldRefetchQuery = !authors
+        .map((author) => author.name)
+        .includes(author);
+
+      if (shouldRefetchQuery) {
+        observableQuery.refetch();
+      }
+    },
   });
 
   const addGenre = () => {
-    setGenres(genres.concat(genre));
+    setGenres((genres) => genres.concat(genre));
     setGenre('');
   };
 
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    createBook({ variables: { title, author, published, genres } });
+    const book = {
+      title,
+      author,
+      published: Number(published),
+      genres,
+    };
+
+    createBook({ variables: { ...book } });
 
     setTitle('');
     setAuthor('');

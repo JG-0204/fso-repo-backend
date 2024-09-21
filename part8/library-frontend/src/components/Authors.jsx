@@ -1,4 +1,4 @@
-import { useQuery, useMutation } from '@apollo/client';
+import { useMutation } from '@apollo/client';
 import { ALL_AUTHORS, EDIT_AUTHOR } from '../queries';
 import { useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
@@ -14,7 +14,16 @@ const BirthYearForm = ({ authors }) => {
   });
 
   const [editAuthor] = useMutation(EDIT_AUTHOR, {
-    refetchQueries: [{ query: ALL_AUTHORS }],
+    update: (cache, response) => {
+      cache.updateQuery({ query: ALL_AUTHORS }, ({ allAuthors }) => {
+        const updatedAuthor = response.data.editAuthor;
+        return {
+          allAuthors: allAuthors.map((author) =>
+            author.name !== updatedAuthor.name ? author : updatedAuthor
+          ),
+        };
+      });
+    },
   });
 
   const handleSubmit = (event) => {
@@ -55,13 +64,9 @@ const BirthYearForm = ({ authors }) => {
 };
 
 const Authors = () => {
-  const { loading, data } = useQuery(ALL_AUTHORS);
+  const { token, authors } = useOutletContext();
 
-  const { token } = useOutletContext();
-
-  if (loading) return <div>loading...</div>;
-
-  const authors = data.allAuthors;
+  if (!authors) return <div>loading...</div>;
 
   return (
     <div>
@@ -75,7 +80,7 @@ const Authors = () => {
           </tr>
         </thead>
         <tbody>
-          {authors.map((author) => (
+          {authors?.map((author) => (
             <tr key={author.name}>
               <th style={{ textAlign: 'left' }}>{author.name}</th>
               <td>{author.born ?? 'none'}</td>

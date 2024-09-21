@@ -1,27 +1,33 @@
 import { Outlet, Link } from 'react-router-dom';
-import { useQuery } from '@apollo/client';
-import { ME } from './queries';
+import { useQuery, useApolloClient } from '@apollo/client';
+import { ALL_AUTHORS, ME } from './queries';
 import { useEffect, useState } from 'react';
 
 const App = () => {
   const [token, setToken] = useState(null);
-  const { data, loading } = useQuery(ME);
+  const { data: currUser, loading: currUserLoading } = useQuery(ME, {
+    skip: !token,
+  });
+  const { data: authorsQuery, loading: allAuthorsLoading } =
+    useQuery(ALL_AUTHORS);
+  const client = useApolloClient();
 
   useEffect(() => {
     const userToken = localStorage.getItem('user-token');
     if (userToken) setToken(userToken);
   }, []);
 
-  if (loading) return <h1>loading....</h1>;
+  if (currUserLoading) return <h1>loading....</h1>;
 
   const logout = () => {
     setToken(null);
     localStorage.clear();
+    client.resetStore();
   };
 
   return (
     <div>
-      {token && <h3>login as {data?.me.username}</h3>}
+      {token && <h3>login as {currUser?.me.username}</h3>}
 
       <div style={{ display: 'flex', gap: '3px' }}>
         <button>
@@ -50,7 +56,8 @@ const App = () => {
         context={{
           setToken: setToken,
           token: token,
-          loggedInUser: data ? data.me : null,
+          loggedInUser: currUser ? currUser.me : null,
+          authors: !allAuthorsLoading ? authorsQuery.allAuthors : null,
         }}
       />
     </div>

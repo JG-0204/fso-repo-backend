@@ -41,7 +41,7 @@ const RecommendedBooks = () => {
         </thead>
         <tbody>
           {books.map((book) => (
-            <tr key={book.id}>
+            <tr key={book.title}>
               <th style={{ textAlign: 'left' }}>{book.title}</th>
               <td>{book.author.name}</td>
               <td>{book.published}</td>

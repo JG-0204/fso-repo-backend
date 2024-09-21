@@ -1,7 +1,7 @@
 import { gql } from '@apollo/client';
 
 export const ALL_AUTHORS = gql`
-  query {
+  query AllAuthors {
     allAuthors {
       name
       born
@@ -18,7 +18,6 @@ export const ALL_BOOKS = gql`
       author {
         name
       }
-      id
       genres
     }
   }
@@ -42,6 +41,7 @@ export const CREATE_BOOK = gql`
         name
       }
       published
+      genres
     }
   }
 `;
@@ -51,6 +51,7 @@ export const EDIT_AUTHOR = gql`
     editAuthor(name: $name, setBornTo: $setBornTo) {
       name
       born
+      bookCount
     }
   }
 `;
@@ -81,7 +82,6 @@ export const BOOKS_BY_GENRE = gql`
       author {
         name
       }
-      id
     }
   }
 `;
