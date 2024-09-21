@@ -167,7 +167,7 @@ const resolvers = {
 
       if (argsIsEmpty) return books;
 
-      const author = await Author.findOne({ name: args.author }).exec();
+      const author = await Author.findOne({ name: args.author });
 
       const byAuthor = (book) => book.author.equals(author._id);
       const byGenre = (book) => book.genres.includes(args.genre);
@@ -179,10 +179,7 @@ const resolvers = {
       if (args.genre) return books.filter(byGenre);
       if (args.author) return books.filter(byAuthor);
     },
-    allAuthors: async (_root) => {
-      const authors = await Author.find({});
-      return authors;
-    },
+    allAuthors: async (_root) => await Author.find({}),
     me: (_root, _args, { currentUser }) => {
       if (!currentUser) {
         throw new GraphQLError('user not logged-in', {
@@ -204,16 +201,14 @@ const resolvers = {
         });
       }
 
-      const author = await Author.findOne({ name: args.author }).exec();
+      const author = await Author.findOne({ name: args.author });
 
       if (!author) {
         const newAuthor = new Author({ name: args.author });
 
         const book = new Book({
           ...args,
-          author: {
-            _id: newAuthor._id,
-          },
+          author: newAuthor._id,
         });
 
         try {
@@ -234,9 +229,7 @@ const resolvers = {
 
       const book = new Book({
         ...args,
-        author: {
-          _id: author._id,
-        },
+        author: author._id,
       });
 
       try {
