@@ -6,12 +6,10 @@ const getAllBookGenres = (books) => {
   const arr = [];
   books.map((book) => {
     if (book.genres.length === 0) return;
-    if (book.genres.length > 1) {
+    if (book.genres.length >= 1) {
       book.genres.forEach((genre) => {
         if (!arr.includes(genre)) arr.push(genre);
       });
-    } else {
-      if (!arr.includes(book.genres)) arr.push(book.genres);
     }
   });
 
@@ -32,9 +30,12 @@ const Books = () => {
     <div>
       <h2>Books</h2>
       {booksByGenre && (
-        <p>
-          in genre <strong>{genre}</strong>
-        </p>
+        <div>
+          <p>
+            in genre <strong>{genre}</strong>
+            <button onClick={() => setBooksByGenre(null)}>remove</button>
+          </p>
+        </div>
       )}
       <table>
         <thead>
@@ -45,8 +46,8 @@ const Books = () => {
           </tr>
         </thead>
         <tbody>
-          {books.map((book) => (
-            <tr key={book.id}>
+          {books?.map((book) => (
+            <tr key={book.title}>
               <th style={{ textAlign: 'left' }}>{book.title}</th>
               <td>{book.author.name}</td>
               <td>{book.published}</td>
@@ -64,17 +65,18 @@ const Books = () => {
 };
 
 const BookGenres = ({ genres, setBooks, setSelectedGenre }) => {
-  const [genre, setGenre] = useState('');
+  const [genre, setGenre] = useState(null);
 
   const { data } = useQuery(BOOKS_BY_GENRE, {
     variables: { genre },
+    skip: !genre,
   });
 
   useEffect(() => {
     if (data) {
       setBooks(data?.allBooks);
     }
-  }, [setBooks, data]);
+  }, [setBooks, data, genre]);
 
   const handleClick = (genre) => {
     console.log('setting genre to ', genre);
