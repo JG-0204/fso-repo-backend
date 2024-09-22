@@ -1,6 +1,18 @@
 const { ApolloServer } = require('@apollo/server');
-const { startStandaloneServer } = require('@apollo/server/standalone');
 const { GraphQLError } = require('graphql');
+
+const { WebSocketServer } = require('ws');
+const { useServer } = require('graphql-ws/lib/use/ws');
+const { expressMiddleware } = require('@apollo/server/express4');
+const {
+  ApolloServerPluginDrainHttpServer,
+} = require('@apollo/server/plugin/drainHttpServer');
+const { makeExecutableSchema } = require('@graphql-tools/schema');
+const { PubSub } = require('graphql-subscriptions');
+const pubsub = new PubSub();
+const express = require('express');
+const cors = require('cors');
+const http = require('http');
 
 const mongoose = require('mongoose');
 mongoose.set('strictQuery', false);
@@ -10,19 +22,6 @@ const config = require('./utils/config');
 const Author = require('./models/author');
 const Book = require('./models/book');
 const User = require('./models/user');
-
-const connectToDB = () => {
-  console.log('connecting to ' + config.MONGODB_URI);
-
-  mongoose
-    .connect(config.MONGODB_URI)
-    .then(() => {
-      console.log('connected to db');
-    })
-    .catch((e) => {
-      console.log('Something went wrong ' + e.message);
-    });
-};
 
 let authors = [
   {
@@ -147,6 +146,10 @@ const typeDefs = `
       password: String!
       ): Token
   }
+
+  type Subscription {
+    bookAdded: Book!
+  }
 `;
 
 const resolvers = {
@@ -224,6 +227,7 @@ const resolvers = {
         }
 
         const bookObj = await Book.findById(book._id).populate('author');
+        pubsub.publish('BOOK_ADDED', { bookAdded: bookObj });
         return bookObj;
       }
 
@@ -244,6 +248,7 @@ const resolvers = {
       }
 
       const bookObj = await Book.findById(book._id).populate('author');
+      pubsub.publish('BOOK_ADDED', { bookAdded: bookObj });
       return bookObj;
     },
 
@@ -318,28 +323,80 @@ const resolvers = {
       return { value: token };
     },
   },
+  Subscription: {
+    bookAdded: {
+      subscribe: () => pubsub.asyncIterator('BOOK_ADDED'),
+    },
+  },
 };
 
-const server = new ApolloServer({
-  typeDefs,
-  resolvers,
-});
+const connectToDB = () => {
+  console.log('connecting to ' + config.MONGODB_URI);
 
-startStandaloneServer(server, {
-  listen: { port: 4000 },
-  context: async ({ req, res }) => {
-    const auth = req ? req.headers.authorization : null;
-    if (auth && auth.startsWith('Bearer ')) {
-      const decodedToken = jwt.verify(auth.substring(7), config.JWT_KEY);
-      const currentUser = await User.findById(decodedToken.id);
-      return { currentUser };
-    }
-  },
-}).then(({ url }) => {
-  console.log(`Server ready at ${url}`);
-});
+  mongoose
+    .connect(config.MONGODB_URI)
+    .then(() => {
+      console.log('connected to db');
+    })
+    .catch((e) => {
+      console.log('Something went wrong ' + e.message);
+    });
+};
 
-connectToDB();
+const start = async () => {
+  const app = express();
+  const httpServer = http.createServer(app);
+
+  const wsServer = new WebSocketServer({
+    server: httpServer,
+    path: '/',
+  });
+
+  const schema = makeExecutableSchema({ typeDefs, resolvers });
+  const serverCleanup = useServer({ schema }, wsServer);
+
+  const server = new ApolloServer({
+    schema,
+    plugins: [
+      ApolloServerPluginDrainHttpServer({ httpServer }),
+      {
+        async serverWillStart() {
+          return {
+            async drainServer() {
+              await serverCleanup.dispose();
+            },
+          };
+        },
+      },
+    ],
+  });
+
+  await server.start();
+
+  app.use(
+    '/',
+    cors(),
+    express.json(),
+    expressMiddleware(server, {
+      context: async ({ req }) => {
+        const auth = req ? req.headers.authorization : null;
+        if (auth && auth.startsWith('Bearer ')) {
+          const decodedToken = jwt.verify(auth.substring(7), config.JWT_KEY);
+          const currentUser = await User.findById(decodedToken.id);
+          return { currentUser };
+        }
+      },
+    })
+  );
+
+  httpServer.listen(config.PORT, () => {
+    console.log(`server running on http://localhost:${config.PORT}`);
+  });
+
+  connectToDB();
+};
+
+start();
 
 // const addToDb = async () => {
 //   await Author.deleteMany({});
