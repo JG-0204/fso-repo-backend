@@ -1,6 +1,7 @@
 import { useQuery } from '@apollo/client';
-import { ALL_BOOKS, BOOKS_BY_GENRE } from '../queries';
+import { BOOKS_BY_GENRE } from '../queries';
 import { useEffect, useState } from 'react';
+import { useOutletContext } from 'react-router-dom';
 
 const getAllBookGenres = (books) => {
   const arr = [];
@@ -19,12 +20,13 @@ const getAllBookGenres = (books) => {
 const Books = () => {
   const [genre, setGenre] = useState(null);
   const [booksByGenre, setBooksByGenre] = useState(null);
-  const { loading, data } = useQuery(ALL_BOOKS);
 
-  if (loading) return <div>loading...</div>;
+  const { books } = useOutletContext();
 
-  const books = !booksByGenre ? data?.allBooks : booksByGenre;
-  const bookGenres = getAllBookGenres(data?.allBooks);
+  if (!books) return <div>loading...</div>;
+
+  const booksArr = !booksByGenre ? books : booksByGenre;
+  const bookGenres = getAllBookGenres(books);
 
   return (
     <div>
@@ -46,7 +48,7 @@ const Books = () => {
           </tr>
         </thead>
         <tbody>
-          {books?.map((book) => (
+          {booksArr.map((book) => (
             <tr key={book.title}>
               <th style={{ textAlign: 'left' }}>{book.title}</th>
               <td>{book.author.name}</td>

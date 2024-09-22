@@ -1,7 +1,9 @@
 import { Outlet, Link } from 'react-router-dom';
-import { useQuery, useApolloClient } from '@apollo/client';
-import { ALL_AUTHORS, ME } from './queries';
+import { useQuery, useApolloClient, useSubscription } from '@apollo/client';
+import { ALL_AUTHORS, ALL_BOOKS, BOOK_ADDED, ME } from './queries';
 import { useEffect, useState } from 'react';
+
+import updateCache from './util';
 
 const App = () => {
   const [token, setToken] = useState(null);
@@ -10,7 +12,18 @@ const App = () => {
   });
   const { data: authorsQuery, loading: allAuthorsLoading } =
     useQuery(ALL_AUTHORS);
+  const { data: booksQuery, loading: allBooksLoading } = useQuery(ALL_BOOKS);
   const client = useApolloClient();
+
+  useSubscription(BOOK_ADDED, {
+    onData: ({ data, client }) => {
+      const bookAdded = data.data?.bookAdded;
+      alert(
+        `a new book: ${bookAdded.title} by ${bookAdded.author.name} has been added.`
+      );
+      updateCache(client.cache, { query: ALL_BOOKS }, bookAdded);
+    },
+  });
 
   useEffect(() => {
     const userToken = localStorage.getItem('user-token');
@@ -58,6 +71,7 @@ const App = () => {
           token: token,
           loggedInUser: currUser ? currUser.me : null,
           authors: !allAuthorsLoading ? authorsQuery.allAuthors : null,
+          books: !allBooksLoading ? booksQuery.allBooks : null,
         }}
       />
     </div>

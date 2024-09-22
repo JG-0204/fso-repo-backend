@@ -3,6 +3,8 @@ import { useMutation } from '@apollo/client';
 import { CREATE_BOOK, ALL_AUTHORS, ALL_BOOKS } from '../queries';
 import { useOutletContext } from 'react-router-dom';
 
+import updateCache from '../util';
+
 const BookForm = () => {
   const { authors } = useOutletContext();
 
@@ -14,11 +16,7 @@ const BookForm = () => {
 
   const [createBook] = useMutation(CREATE_BOOK, {
     update: (cache, response) => {
-      cache.updateQuery({ query: ALL_BOOKS }, ({ allBooks }) => {
-        return {
-          allBooks: allBooks?.concat(response.data?.addBook),
-        };
-      });
+      updateCache(cache, { query: ALL_BOOKS }, response.data.addBook);
     },
     refetchQueries: [{ query: ALL_AUTHORS }],
     onQueryUpdated: (observableQuery) => {
