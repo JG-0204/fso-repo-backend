@@ -19,15 +19,15 @@ const BookForm = () => {
       updateCache(cache, { query: ALL_BOOKS }, response.data.addBook);
     },
     refetchQueries: [{ query: ALL_AUTHORS }],
-    onQueryUpdated: (observableQuery) => {
-      const shouldRefetchQuery = !authors
-        .map((author) => author.name)
-        .includes(author);
+    // onQueryUpdated: (observableQuery) => {
+    //   const shouldRefetchQuery = !authors
+    //     .map((author) => author.name)
+    //     .includes(author);
 
-      if (shouldRefetchQuery) {
-        observableQuery.refetch();
-      }
-    },
+    //   if (shouldRefetchQuery) {
+    //     observableQuery.refetch();
+    //   }
+    // },
   });
 
   const addGenre = () => {

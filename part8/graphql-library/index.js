@@ -23,72 +23,6 @@ const Author = require('./models/author');
 const Book = require('./models/book');
 const User = require('./models/user');
 
-let authors = [
-  {
-    name: 'Robert Martin',
-    born: 1952,
-  },
-  {
-    name: 'Martin Fowler',
-    born: 1963,
-  },
-  {
-    name: 'Fyodor Dostoevsky',
-    born: 1821,
-  },
-  {
-    name: 'Joshua Kerievsky', // birthyear not known
-  },
-  {
-    name: 'Sandi Metz', // birthyear not known
-  },
-];
-
-let books = [
-  {
-    title: 'Clean Code',
-    published: 2008,
-    author: 'Robert Martin',
-    genres: ['refactoring'],
-  },
-  {
-    title: 'Agile software development',
-    published: 2002,
-    author: 'Robert Martin',
-    genres: ['agile', 'patterns', 'design'],
-  },
-  {
-    title: 'Refactoring, edition 2',
-    published: 2018,
-    author: 'Martin Fowler',
-    genres: ['refactoring'],
-  },
-  {
-    title: 'Refactoring to patterns',
-    published: 2008,
-    author: 'Joshua Kerievsky',
-    genres: ['refactoring', 'patterns'],
-  },
-  {
-    title: 'Practical Object-Oriented Design, An Agile Primer Using Ruby',
-    published: 2012,
-    author: 'Sandi Metz',
-    genres: ['refactoring', 'design'],
-  },
-  {
-    title: 'Crime and punishment',
-    published: 1866,
-    author: 'Fyodor Dostoevsky',
-    genres: ['classic', 'crime'],
-  },
-  {
-    title: 'The Demon ',
-    published: 1872,
-    author: 'Fyodor Dostoevsky',
-    genres: ['classic', 'revolution'],
-  },
-];
-
 const typeDefs = `
   type Book {
     title: String!
@@ -153,13 +87,6 @@ const typeDefs = `
 `;
 
 const resolvers = {
-  Author: {
-    bookCount: async (root) => {
-      const authorBooks = await Book.find({ author: root._id }).exec();
-      return authorBooks.length;
-    },
-  },
-
   Query: {
     booksCount: async (_root) => await Book.collection.estimatedDocumentCount(),
     authorsCount: async (_root) =>
@@ -182,7 +109,10 @@ const resolvers = {
       if (args.genre) return books.filter(byGenre);
       if (args.author) return books.filter(byAuthor);
     },
-    allAuthors: async (_root) => await Author.find({}),
+    allAuthors: async (_root) => {
+      const authors = await Author.find({});
+      return authors;
+    },
     me: (_root, _args, { currentUser }) => {
       if (!currentUser) {
         throw new GraphQLError('user not logged-in', {
@@ -208,6 +138,7 @@ const resolvers = {
 
       if (!author) {
         const newAuthor = new Author({ name: args.author });
+        newAuthor.bookCount = 1;
 
         const book = new Book({
           ...args,
@@ -236,6 +167,13 @@ const resolvers = {
         author: author._id,
       });
 
+      await Author.updateOne(
+        { name: author.name },
+        {
+          bookCount: (author.bookCount += 1),
+        }
+      );
+
       try {
         await book.save();
       } catch (error) {
@@ -249,6 +187,7 @@ const resolvers = {
 
       const bookObj = await Book.findById(book._id).populate('author');
       pubsub.publish('BOOK_ADDED', { bookAdded: bookObj });
+
       return bookObj;
     },
 
@@ -397,6 +336,34 @@ const start = async () => {
 };
 
 start();
+
+// let authors = [
+//   {
+//     name: 'Robert Martin',
+//     born: 1952,
+//     bookCount: 0,
+//   },
+//   {
+//     name: 'Martin Fowler',
+//     born: 1963,
+//     bookCount: 0,
+//   },
+//   {
+//     name: 'Fyodor Dostoevsky',
+//     born: 1821,
+//     bookCount: 0,
+//   },
+//   {
+//     name: 'Joshua Kerievsky',
+//     bookCount: 0,
+//     birthyear not known
+//   },
+//   {
+//     name: 'Sandi Metz',
+//     bookCount: 0,
+//     birthyear not known
+//   },
+// ];
 
 // const addToDb = async () => {
 //   await Author.deleteMany({});
